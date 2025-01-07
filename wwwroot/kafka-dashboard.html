@@ -1,0 +1,690 @@
+﻿<!--<!DOCTYPE html>
+<html lang="en">
+
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Kafka Messages</title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+
+	<style>
+		body {
+			background-color: #f4f4f9;
+		}
+
+		.sidebar {
+			width: 250px;
+			position: fixed;
+			top: 0;
+			left: 0;
+			background-color: #005387;
+			color: white;
+			height: 100%;
+			padding-top: 20px;
+		}
+
+			.sidebar a {
+				display: block;
+				color: white;
+				padding: 10px 20px;
+				text-decoration: none;
+			}
+
+				.sidebar a:hover {
+					background-color: #0073e6;
+				}
+
+		.content {
+			margin-left: 260px;
+			padding: 20px;
+		}
+	</style>
+
+
+</head>
+
+
+<body>
+	<div class="sidebar">
+		<a href="index.html">Home</a>
+		<a href="kafka-dashboard.html">Kafka Messages</a>
+	</div>
+
+
+	<div class="content">
+		<h1>Kafka Messages Dashboard</h1>
+		<ul id="messageList"></ul>
+	</div>
+
+	<script>
+		const fetchMessages = async () => {
+			const response = await fetch("http://localhost:5000/api/messages");
+			const data = await response.json();
+
+			const messageList = document.getElementById('messageList');
+			messageList.innerHTML = '';
+
+			data.forEach(message => {
+				const li = document.createElement('li');
+				li.textContent = message;
+				messageList.appendChild(li);
+			});
+		};
+
+		setInterval(fetchMessages, 2000);
+	</script>
+</body>
+</html>-->
+<!--<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Kafka Messages</title>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/5.0.15/signalr.min.js"></script>
+
+	<style>
+
+		/*新增sidebar返回===================================*/
+		.sidebar {
+			width: 250px;
+			position: fixed;
+			top: 0;
+			left: 0;
+			background-color: #005387;
+			color: white;
+			height: 100%;
+			padding-top: 20px;
+		}
+
+			.sidebar a {
+				display: block;
+				color: white;
+				padding: 10px 20px;
+				text-decoration: none;
+			}
+
+				.sidebar a:hover {
+					background-color: #0073e6;
+				}
+
+		.content {
+			margin-left: 260px;
+			padding: 20px;
+		}
+		/*新增sidebar返回===================================*/
+
+
+
+
+		/* 通用樣式 */
+		body {
+			font-family: Arial, sans-serif;
+			background-color: #f4f4f9;
+			margin: 0;
+			padding: 0;
+		}
+
+		header {
+			background-color: #4CAF50;
+			color: white;
+			padding: 1rem;
+			text-align: center;
+			font-size: 1.5rem;
+		}
+
+		main {
+			padding: 2rem;
+			max-width: 800px;
+			margin: auto;
+		}
+
+		h1 {
+			font-size: 1.8rem;
+			color: #333;
+			text-align: center;
+			margin-bottom: 1rem;
+		}
+
+		#messageList {
+			list-style-type: none;
+			padding: 0;
+		}
+
+			#messageList li {
+				background-color: white;
+				border: 1px solid #ddd;
+				border-radius: 5px;
+				padding: 1rem;
+				margin: 0.5rem 0;
+				box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+				transition: background-color 0.3s;
+			}
+
+				#messageList li:hover {
+					background-color: #f9f9f9;
+				}
+
+		footer {
+			text-align: center;
+			margin-top: 2rem;
+			font-size: 0.9rem;
+			color: #888;
+		}
+
+		.loading {
+			color: #999;
+			font-size: 1.1rem;
+			text-align: center;
+			margin-top: 2rem;
+		}
+	</style>
+
+</head>
+
+
+<body>
+
+
+
+	<header>Kafka Messages Dashboard</header>
+
+	<div class="sidebar">
+		<a href="index.html">Home</a>
+		<a href="kafka-dashboard.html">Kafka Messages</a>
+	</div>
+
+	<main>
+		<h1>Message Feed</h1>
+		<ul id="messageList">
+			<li class="loading">Loading messages...</li>
+		</ul>
+	</main>
+	<footer>
+		&copy; 2025 Kafka Consumer Web API | Powered by SignalR
+	</footer>
+
+	<script>
+		// 連接 SignalR Hub
+		const connection = new signalR.HubConnectionBuilder()
+			.withUrl("http://localhost:5000/messageHub")
+			.build();
+
+		connection.on("ReceiveMessage", (user, message) => {
+			const li = document.createElement("li");
+			li.textContent = `${user}: ${message}`;
+			document.getElementById("messageList").appendChild(li);
+		});
+
+		connection.start().catch(err => console.error("SignalR Error: ", err));
+
+		// 定期從後端拉取 Kafka 緩存消息
+		async function fetchMessages() {
+			try {
+				const response = await fetch("http://localhost:5000/api/messages");
+				const messages = await response.json();
+
+				const messageList = document.getElementById("messageList");
+				messageList.innerHTML = ""; // 清空舊消息列表
+
+				if (messages.length === 0) {
+					// 當消息為空時顯示提示
+					const li = document.createElement("li");
+					li.textContent = "暫無數據";
+					li.className = "loading";
+					messageList.appendChild(li);
+				} else {
+					messages.forEach(message => {
+						const li = document.createElement("li");
+						li.textContent = message;
+						messageList.appendChild(li);
+					});
+				}
+			} catch (error) {
+				console.error("Fetch Error:", error);
+			}
+		}
+
+		setInterval(fetchMessages, 2000); // 每 2 秒拉取一次消息
+	</script>
+</body>
+</html>-->
+<!--<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Kafka Messages Dashboard</title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/5.0.15/signalr.min.js"></script>
+	<style>
+		body {
+			background-color: #f4f4f9;
+			font-family: Arial, sans-serif;
+		}
+
+		.sidebar {
+			width: 250px;
+			position: fixed;
+			top: 0;
+			left: 0;
+			background-color: #005387;
+			color: white;
+			height: 100%;
+			padding-top: 20px;
+		}
+
+			.sidebar a {
+				display: block;
+				color: white;
+				padding: 10px 20px;
+				text-decoration: none;
+			}
+
+				.sidebar a:hover {
+					background-color: #0073e6;
+				}
+
+		.content {
+			margin-left: 260px;
+			padding: 20px;
+		}
+
+		.header {
+			background-color: #005387;
+			color: white;
+			padding: 1rem;
+			text-align: center;
+		}
+
+		.card {
+			border: none;
+			border-radius: 8px;
+			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+			background-color: white;
+		}
+
+		.card-title {
+			font-size: 1.2rem;
+			font-weight: bold;
+		}
+
+		ul#messageList {
+			list-style-type: none;
+			padding: 0;
+			margin: 0;
+		}
+
+			ul#messageList li {
+				background-color: #ffffff;
+				border: 1px solid #ddd;
+				border-radius: 5px;
+				padding: 1rem;
+				margin: 0.5rem 0;
+				box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+				transition: background-color 0.3s;
+			}
+
+				ul#messageList li:hover {
+					background-color: #f9f9f9;
+				}
+
+		.loading {
+			color: #999;
+			font-size: 1.1rem;
+			text-align: center;
+			margin-top: 1rem;
+		}
+
+		footer {
+			text-align: center;
+			margin-top: 2rem;
+			font-size: 0.9rem;
+			color: #888;
+		}
+	</style>
+</head>
+
+<body>-->
+<!-- Sidebar -->
+<!--<div class="sidebar">
+	<a href="index.html">Home</a>
+	<a href="kafka-dashboard.html">Kafka Messages</a>
+</div>-->
+<!-- Content -->
+<!--<div class="content">
+		<div class="header">
+			<h1>Kafka Messages Dashboard</h1>
+		</div>
+
+		<div class="container mt-4">
+			<div class="row">
+				<div class="col">
+					<div class="card">
+						<div class="card-body">
+							<h5 class="card-title">Message Feed</h5>
+							<ul id="messageList">
+								<li class="loading">Loading messages...</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<footer>
+		&copy; 2025 Kafka Consumer Web API | Powered by SignalR
+	</footer>
+
+	<script>
+		// 全局數據緩存
+		let cachedMessages = [];
+
+		// 連接 SignalR Hub
+		const connection = new signalR.HubConnectionBuilder()
+			.withUrl("http://localhost:5000/messageHub")
+			.build();
+
+		connection.on("ReceiveMessage", (user, message) => {
+			const newMessage = `${user}: ${message}`;
+			cachedMessages.push(newMessage);
+			updateMessageList(); // 更新顯示
+		});
+
+		connection.start().catch(err => console.error("SignalR Error: ", err));
+
+		// 更新消息列表
+		function updateMessageList() {
+			const messageList = document.getElementById("messageList");
+			messageList.innerHTML = ""; // 清空列表
+
+			if (cachedMessages.length === 0) {
+				// 當沒有數據時顯示提示
+				const li = document.createElement("li");
+				li.textContent = "暫無數據";
+				li.className = "loading";
+				messageList.appendChild(li);
+			} else {
+				// 顯示緩存數據
+				cachedMessages.forEach(message => {
+					const li = document.createElement("li");
+					li.textContent = message;
+					messageList.appendChild(li);
+				});
+			}
+		}
+
+		// 定期從後端拉取 Kafka 緩存消息
+		async function fetchMessages() {
+			try {
+				const response = await fetch("http://localhost:5000/api/messages");
+				const messages = await response.json();
+
+				// 如果有新數據則更新緩存
+				if (JSON.stringify(messages) !== JSON.stringify(cachedMessages)) {
+					cachedMessages = messages;
+					updateMessageList(); // 更新顯示
+				}
+			} catch (error) {
+				console.error("Fetch Error:", error);
+			}
+		}
+
+		// 初始化：顯示緩存或拉取數據
+		document.addEventListener("DOMContentLoaded", () => {
+			updateMessageList();
+			fetchMessages();
+		});
+
+		setInterval(fetchMessages, 2000); // 每 2 秒拉取一次數據
+	</script>
+</body>
+</html>-->
+<!--<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Kafka Messages Dashboard</title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/5.0.15/signalr.min.js"></script>
+	<style>
+		body {
+			background-color: #f4f4f9;
+			font-family: Arial, sans-serif;
+		}
+
+		.sidebar {
+			width: 250px;
+			position: fixed;
+			top: 0;
+			left: 0;
+			background-color: #005387;
+			color: white;
+			height: 100%;
+			padding-top: 20px;
+		}
+
+			.sidebar a {
+				display: block;
+				color: white;
+				padding: 10px 20px;
+				text-decoration: none;
+			}
+
+				.sidebar a:hover {
+					background-color: #0073e6;
+				}
+
+		.content {
+			margin-left: 260px;
+			padding: 20px;
+		}
+
+		.card {
+			border: none;
+			border-radius: 8px;
+			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+			background-color: white;
+		}
+
+		ul#messageList {
+			list-style-type: none;
+			padding: 0;
+			margin: 0;
+		}
+
+			ul#messageList li {
+				background-color: #ffffff;
+				border: 1px solid #ddd;
+				border-radius: 5px;
+				padding: 1rem;
+				margin: 0.5rem 0;
+				box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+				transition: background-color 0.3s;
+			}
+
+				ul#messageList li:hover {
+					background-color: #f9f9f9;
+				}
+
+		.loading {
+			color: #999;
+			font-size: 1.1rem;
+			text-align: center;
+			margin-top: 1rem;
+		}
+
+		footer {
+			text-align: center;
+			margin-top: 2rem;
+			font-size: 0.9rem;
+			color: #888;
+		}
+	</style>
+</head>
+
+<body>-->
+<!-- Sidebar -->
+<!--<div class="sidebar">
+	<a href="index.html">Home</a>
+	<a href="kafka-dashboard.html">Kafka Messages</a>
+</div>-->
+<!-- Content -->
+<!--<div class="content">
+		<div class="header">
+			<h1>Kafka Messages Dashboard</h1>
+		</div>
+
+		<div class="container mt-4">
+			<div class="row">
+				<div class="col">
+					<div class="card">
+						<div class="card-body">
+							<h5 class="card-title">Message Feed</h5>
+							<ul id="messageList">
+								<li class="loading">Loading messages...</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<footer>
+		&copy; 2025 Kafka Consumer Web API | Powered by SignalR
+	</footer>
+
+	<script>
+		// 全局數據緩存
+		let cachedMessages = [];
+
+		// 初始化緩存數據
+		function initializeCachedMessages() {
+			const savedMessages = localStorage.getItem("kafkaMessages");
+			if (savedMessages) {
+				cachedMessages = JSON.parse(savedMessages);
+				updateMessageList();
+			}
+		}
+
+		// 保存數據到 localStorage
+		function saveMessagesToLocalStorage() {
+			localStorage.setItem("kafkaMessages", JSON.stringify(cachedMessages));
+		}
+
+		// 更新消息列表
+		function updateMessageList() {
+			const messageList = document.getElementById("messageList");
+			messageList.innerHTML = ""; // 清空列表
+
+			if (cachedMessages.length === 0) {
+				// 當沒有數據時顯示提示
+				const li = document.createElement("li");
+				li.textContent = "暫無數據";
+				li.className = "loading";
+				messageList.appendChild(li);
+			} else {
+				// 顯示緩存數據
+				cachedMessages.forEach(message => {
+					const li = document.createElement("li");
+					li.textContent = message;
+					messageList.appendChild(li);
+				});
+			}
+		}
+
+		// 連接 SignalR Hub
+		const connection = new signalR.HubConnectionBuilder()
+			.withUrl("http://localhost:5000/messageHub")
+			.build();
+
+		connection.on("ReceiveMessage", (user, message) => {
+			const newMessage = `${user}: ${message}`;
+			cachedMessages.push(newMessage);
+			saveMessagesToLocalStorage(); // 保存數據
+			updateMessageList(); // 更新顯示
+		});
+
+		connection.start().catch(err => console.error("SignalR Error: ", err));
+
+		// 定期從後端拉取 Kafka 緩存消息
+		async function fetchMessages() {
+			try {
+				const response = await fetch("http://localhost:5000/api/messages");
+				const messages = await response.json();
+
+				// 如果有新數據則更新緩存
+				if (JSON.stringify(messages) !== JSON.stringify(cachedMessages)) {
+					cachedMessages = messages;
+					saveMessagesToLocalStorage(); // 保存數據
+					updateMessageList(); // 更新顯示
+				}
+			} catch (error) {
+				console.error("Fetch Error:", error);
+			}
+		}
+
+		// 初始化：顯示緩存或拉取數據
+		document.addEventListener("DOMContentLoaded", () => {
+			initializeCachedMessages(); // 初始化緩存數據
+			fetchMessages();
+		});
+
+		setInterval(fetchMessages, 2000); // 每 2 秒拉取一次數據
+	</script>
+</body>
+</html>-->
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Kafka Messages Dashboard</title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+	<link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+	<!-- Sidebar -->
+	<div class="sidebar">
+		<a href="index.html">Home</a>
+		<a href="kafka-dashboard.html">Kafka Messages</a>
+	</div>
+
+	<!-- Content -->
+	<div class="content">
+		<div class="header">
+			<h1>Kafka Messages Dashboard</h1>
+		</div>
+
+		<div class="container mt-4">
+			<div class="row">
+				<div class="col">
+					<div class="card">
+						<div class="card-body">
+							<h5 class="card-title">Message Feed</h5>
+							<ul id="messageList">
+								<li class="loading">Loading messages...</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<footer>
+		&copy; 2025 Kafka Consumer Web API | Powered by SignalR
+	</footer>
+
+	<script src="js/kafka-dashboard.js"></script>
+</body>
+</html>

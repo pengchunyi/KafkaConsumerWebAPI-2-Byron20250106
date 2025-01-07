@@ -1,0 +1,22 @@
+﻿{
+	"$schema": "https://json.schemastore.org/launchsettings.json",
+	"iisSettings": {
+		"windowsAuthentication": false,
+		"anonymousAuthentication": true,
+		"iisExpress": {
+			"applicationUrl": "http://localhost:5000",
+			"sslPort": 44350
+		}
+	},
+	"profiles": {
+		"KafkaConsumerWebAPI": {
+			"commandName": "Project",
+			"dotnetRunMessages": true,
+			"launchBrowser": true, // 確保此項為 true
+			"applicationUrl": "http://localhost:5000/index.html", // 指定啟動的頁面
+			"environmentVariables": {
+				"ASPNETCORE_ENVIRONMENT": "Development"
+			}
+		}
+	}
+}
