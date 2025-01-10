@@ -1,0 +1,82 @@
+﻿<!DOCTYPE html>
+<html lang="zh_TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Green Facility login page</title>
+    <link rel="stylesheet" href="css/common_style.css">
+    <link rel="stylesheet" href="css/login_style.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            // 處理登入按鈕點擊
+            document.getElementById("loginBtn").addEventListener("click", () => {
+                const username = document.getElementById("username").value;
+                const password = document.getElementById("password").value;
+
+                if (username === "admin" && password === "admin") {
+                    // 驗證成功，跳轉到主頁面
+                    window.location.href = "index.html";
+                } else {
+                    // 顯示錯誤訊息
+                    document.getElementById("error").innerText = "帳號或密碼錯誤！";
+                }
+            });
+        });
+    </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            text-align: center;
+            padding: 50px;
+        }
+
+        .login-container {
+            max-width: 400px;
+            margin: auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        input {
+            display: block;
+            width: calc(100% - 20px);
+            margin: 10px auto;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            background-color: #005387;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+            button:hover {
+                background-color: #0073e6;
+            }
+
+        .error {
+            color: red;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h1>Smart Green Facility</h1>
+        <h1>登入</h1>
+        <input type="text" id="username" placeholder="使用者名稱" />
+        <input type="password" id="password" placeholder="密碼" />
+        <button id="loginBtn">登入</button>
+        <div id="error" class="error"></div>
+    </div>
+</body>
+</html>

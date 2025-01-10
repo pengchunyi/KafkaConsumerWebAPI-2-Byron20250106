@@ -1,0 +1,18 @@
+﻿<!-- sidebar.html -->
+<div class="sidebar">
+    <a href="index.html">Home</a>
+    <a href="kafka-dashboard.html">Kafka Messages</a>
+    <a href="daily_energy_usage.html">Daily Energy Usage</a>
+    <a href="energy-overview.html">Energy Overview</a>
+    <a href="login.html">Log In</a>
+    <a href="#" id="logout-link">Log Out</a>
+</div>
+
+<script>
+    // 添加登出功能
+    document.getElementById("logout-link").addEventListener("click", () => {
+        alert("Logging out...");
+        // 這裡可以調用登出 API 或者清理本地存儲後跳轉
+        window.location.href = "login.html";
+    });
+</script>

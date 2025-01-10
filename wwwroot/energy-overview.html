@@ -1,0 +1,154 @@
+﻿<!--<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>能耗總覽</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="./css/styles.css" rel="stylesheet">
+</head>
+<body>-->
+<!-- Sidebar -->
+<!--<div class="sidebar">
+    <a href="index.html">Home</a>
+    <a href="kafka-dashboard.html">Kafka Messages</a>
+</div>-->
+<!-- Content -->
+<!--<div class="content">
+
+    <header class="header">
+        <h1>
+        <a href="index.html" style="text-decoration: none; color: inherit;">綠色智慧工廠平台</a>
+        </h1>
+
+        <p>
+            <a href="energy-overview.html" style="text-decoration: none; color: inherit;">能耗總覽</a> |
+            <a href="#" style="text-decoration: none; color: inherit;">智慧能耗管理</a> |
+            <a href="#" style="text-decoration: none; color: inherit;">資料分析</a>
+        </p>
+
+    </header>-->
+<!-- Dynamic Content -->
+<!--<div id="dynamic-content" class="dashboard-container">
+            <div class="row">
+                <div class="col-12">
+
+                    <h2 class="text-center">能耗總覽</h2>
+
+                    <div class="row">
+
+                        <div class="col-md-6">
+                            <h5>電力流向圖</h5>
+                            <canvas id="powerFlowChart"></canvas>
+                        </div>
+
+                        <div class="col-md-6">
+                            <h5>用電密度 (kWh/M USD)</h5>
+                            <canvas id="electricityDensityChart"></canvas>
+                        </div>
+
+                    </div>
+
+                    <div class="row mt-4">
+
+                        <div class="col-md-6">
+                            <h5>水流向圖</h5>
+                            <canvas id="waterFlowChart"></canvas>
+                        </div>
+
+                        <div class="col-md-6">
+                            <h5>用水密度 (m³/M USD)</h5>
+                            <canvas id="waterDensityChart"></canvas>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="./js/energy-overview.js"></script>
+</body>
+</html>-->
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>能耗總覽</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="./css/styles.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Sidebar -->
+    <!--<div class="sidebar">
+        <a href="index.html">Home</a>
+        <a href="kafka-dashboard.html">Kafka Messages</a>
+    </div>-->
+    <div id="sidebar-container"></div>
+    <script>
+        // 加載 Sidebar
+        fetch("sidebar.html")
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById("sidebar-container").innerHTML = data;
+            })
+            .catch(error => console.error("Error loading sidebar:", error));
+    </script>
+
+    <!-- Content -->
+    <div class="content">
+        <header class="header">
+            <h1>
+                <a href="index.html" style="text-decoration: none; color: inherit;">綠色智慧工廠平台</a>
+            </h1>
+            <p>
+                <a href="energy-overview.html" style="text-decoration: none; color: inherit;">能耗總覽</a> |
+                <a href="#" style="text-decoration: none; color: inherit;">智慧能耗管理</a> |
+                <a href="#" style="text-decoration: none; color: inherit;">資料分析</a>|
+                <a href="#" style="text-decoration: none; color: inherit;">智能巡檢 </a>|
+                <a href="#" style="text-decoration: none; color: inherit;">報警與工單</a>|
+                <a href="#" style="text-decoration: none; color: inherit;">專家庫</a>
+            </p>
+        </header>
+
+        <div id="dynamic-content" class="dashboard-container">
+            <div class="row">
+                <div class="col-12">
+                    <h2 class="text-center">能耗總覽</h2>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>電力流向圖</h5>
+                            <canvas id="powerFlowChart"></canvas>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>用電密度 (kWh/M USD)</h5>
+                            <canvas id="electricityDensityChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <h5>水流向圖</h5>
+                            <canvas id="waterFlowChart"></canvas>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>用水密度 (m³/M USD)</h5>
+                            <canvas id="waterDensityChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="./js/energy-overview.js"></script>
+</body>
+</html>

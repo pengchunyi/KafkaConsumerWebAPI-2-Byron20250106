@@ -13,7 +13,7 @@
 			"commandName": "Project",
 			"dotnetRunMessages": true,
 			"launchBrowser": true, // 確保此項為 true
-			"applicationUrl": "http://localhost:5000/index.html", // 指定啟動的頁面
+			"applicationUrl": "http://localhost:5000/login.html", // 指定啟動的頁面
 			"environmentVariables": {
 				"ASPNETCORE_ENVIRONMENT": "Development"
 			}

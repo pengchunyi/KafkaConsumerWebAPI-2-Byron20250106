@@ -1,604 +1,56 @@
-﻿<!--<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Dashboard</title>
+	<title>Smart Green Facility</title>
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-	<style>
-		body {
-			background-color: #f4f4f9;
-		}
-
-		.dashboard-header {
-			background-color: #005387;
-			color: white;
-			padding: 1rem;
-			text-align: center;
-		}
-
-		.dashboard-container {
-			margin: 2rem auto;
-			max-width: 1200px;
-		}
-
-		.card {
-			border: none;
-			border-radius: 8px;
-			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-		}
-
-		.chart-container {
-			position: relative;
-			height: 300px;
-			width: 100%;
-		}
-
-		.donut-chart {
-			position: relative;
-			height: 200px;
-			width: 200px;
-			margin: auto;
-		}
-	</style>
+	<link href="css/styles.css" rel="stylesheet">
+  <!--引用公共樣式--> 
 </head>
 <body>
-	<header class="dashboard-header">
-		<h1>Dashboard</h1>
-		<p>能耗總覽 | 智慧能耗管理 | 資料分析</p>
-	</header>
-
-	<div class="dashboard-container">
-		<div class="row g-4">-->
-<!-- Left Section -->
-<!--<div class="col-md-4">
-	<div class="card">
-		<div class="card-body text-center">
-			<h5 class="card-title">空調系統能效 (kW/RT)</h5>
-			<canvas id="gaugeChart1" class="donut-chart"></canvas>
-			<p>即時值: <span id="gaugeValue1">7.1</span></p>
-		</div>
-	</div>
-</div>-->
-<!-- Middle Section -->
-<!--<div class="col-md-4">
-	<div class="card">
-		<div class="card-body text-center">
-			<h5 class="card-title">壓縮系統能效 (kW/CMM)</h5>
-			<canvas id="gaugeChart2" class="donut-chart"></canvas>
-			<p>即時值: <span id="gaugeValue2">7.1</span></p>
-		</div>
-	</div>
-</div>-->
-<!-- Right Section -->
-<!--<div class="col-md-4">
-		<div class="card">
-			<div class="card-body text-center">
-				<h5 class="card-title">生產設備待機用電 (kWh)</h5>
-				<canvas id="donutChart"></canvas>
-			</div>
-		</div>
-	</div>
-</div>-->
-<!-- Bar Charts -->
-<!--<div class="row g-4 mt-4">
-			<div class="col-md-6">
-				<div class="card">
-					<div class="card-body">
-						<h5 class="card-title">目標值 vs 實際值 (kWh)</h5>
-						<div class="chart-container">
-							<canvas id="barChart1"></canvas>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="col-md-6">
-				<div class="card">
-					<div class="card-body">
-						<h5 class="card-title">目標值 vs 實際值 (kW)</h5>
-						<div class="chart-container">
-							<canvas id="barChart2"></canvas>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-
-	<script>
-		// 示例圖表初始化
-		const initDonutChart = (ctx, data, labels) => {
-			new Chart(ctx, {
-				type: 'doughnut',
-				data: {
-					labels: labels,
-					datasets: [{
-						data: data,
-						backgroundColor: ['#4caf50', '#f44336', '#2196f3'],
-					}]
-				},
-				options: {
-					responsive: true,
-					plugins: {
-						legend: {
-							position: 'top',
-						},
-					}
-				}
-			});
-		};
-
-		const initBarChart = (ctx, labels, data) => {
-			new Chart(ctx, {
-				type: 'bar',
-				data: {
-					labels: labels,
-					datasets: [{
-						label: '目標值',
-						data: data[0],
-						backgroundColor: '#2196f3',
-					}, {
-						label: '實際值',
-						data: data[1],
-						backgroundColor: '#4caf50',
-					}]
-				},
-				options: {
-					responsive: true,
-					scales: {
-						x: {
-							grid: {
-								display: false
-							}
-						},
-						y: {
-							beginAtZero: true
-						}
-					}
-				}
-			});
-		};
-
-		// Initialize Charts
-		document.addEventListener('DOMContentLoaded', () => {
-			const donutCtx = document.getElementById('donutChart').getContext('2d');
-			const barCtx1 = document.getElementById('barChart1').getContext('2d');
-			const barCtx2 = document.getElementById('barChart2').getContext('2d');
-			const gaugeCtx1 = document.getElementById('gaugeChart1').getContext('2d');
-			const gaugeCtx2 = document.getElementById('gaugeChart2').getContext('2d');
-
-			// Data for Charts
-			const donutData = [35.58, 33.83, 30.59];
-			const barLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-			const barData = [
-				[105000, 109000, 110000, 115000, 120000, 125000, 130000, 135000, 140000, 145000, 150000, 155000],
-				[85000, 89000, 90000, 95000, 100000, 110000, 120000, 125000, 130000, 135000, 140000, 145000]
-			];
-
-			initDonutChart(donutCtx, donutData, ['生產用電', '待機用電', '其他']);
-			initBarChart(barCtx1, barLabels, barData);
-			initBarChart(barCtx2, barLabels, barData);
-
-			// Update gauge values dynamically (可以通過即時介面更新資料)
-			document.getElementById('gaugeValue1').textContent = '7.1';
-			document.getElementById('gaugeValue2').textContent = '7.1';
-		});
-	</script>
-</body>
-</html>-->
-<!--<!DOCTYPE html>
-<html lang="en">
-<head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Kafka Messages</title>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/5.0.15/signalr.min.js"></script>
-</head>
-<body>
-	<h1>Kafka Messages</h1>
-	<ul id="messageList"></ul>
-
-	<script>
-		// 連接 SignalR Hub
-		const connection = new signalR.HubConnectionBuilder()
-			.withUrl("http://localhost:5000/messageHub")
-			.build();
-
-		connection.on("ReceiveMessage", (user, message) => {
-			const li = document.createElement("li");
-			li.textContent = `${user}: ${message}`;
-			document.getElementById("messageList").appendChild(li);
-		});
-
-		connection.start().catch(err => console.error("SignalR Error: ", err));
-
-		// 定期從後端拉取 Kafka 緩存消息
-		async function fetchMessages() {
-			try {
-				const response = await fetch("http://localhost:5000/api/messages");
-				const messages = await response.json();
-
-				const messageList = document.getElementById("messageList");
-				messageList.innerHTML = ""; // 清空舊消息列表
-
-				if (messages.length === 0) {
-					// 當消息為空時顯示提示
-					const li = document.createElement("li");
-					li.textContent = "暫無數據";
-					messageList.appendChild(li);
-				} else {
-					messages.forEach(message => {
-						const li = document.createElement("li");
-						li.textContent = message;
-						messageList.appendChild(li);
-					});
-				}
-			} catch (error) {
-				console.error("Fetch Error:", error);
-			}
-		}
-
-
-		setInterval(fetchMessages, 2000); // 每 5 秒拉取一次消息
-	</script>
-</body>
-</html>-->
-<!--<!DOCTYPE html>
-<html lang="en">
-<head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Kafka Messages</title>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/5.0.15/signalr.min.js"></script>
-	<style>
-		/* 通用樣式 */
-		body {
-			font-family: Arial, sans-serif;
-			background-color: #f4f4f9;
-			margin: 0;
-			padding: 0;
-		}
-
-		header {
-			background-color: #4CAF50;
-			color: white;
-			padding: 1rem;
-			text-align: center;
-			font-size: 1.5rem;
-		}
-
-		main {
-			padding: 2rem;
-			max-width: 800px;
-			margin: auto;
-		}
-
-		h1 {
-			font-size: 1.8rem;
-			color: #333;
-			text-align: center;
-			margin-bottom: 1rem;
-		}
-
-		#messageList {
-			list-style-type: none;
-			padding: 0;
-		}
-
-			#messageList li {
-				background-color: white;
-				border: 1px solid #ddd;
-				border-radius: 5px;
-				padding: 1rem;
-				margin: 0.5rem 0;
-				box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-				transition: background-color 0.3s;
-			}
-
-				#messageList li:hover {
-					background-color: #f9f9f9;
-				}
-
-		footer {
-			text-align: center;
-			margin-top: 2rem;
-			font-size: 0.9rem;
-			color: #888;
-		}
-
-		.loading {
-			color: #999;
-			font-size: 1.1rem;
-			text-align: center;
-			margin-top: 2rem;
-		}
-	</style>
-</head>
-<body>
-	<header>Kafka Messages Dashboard</header>
-	<main>
-		<h1>Message Feed</h1>
-		<ul id="messageList">
-			<li class="loading">Loading messages...</li>
-		</ul>
-	</main>
-	<footer>
-		&copy; 2025 Kafka Consumer Web API | Powered by SignalR
-	</footer>
-
-	<script>
-		// 連接 SignalR Hub
-		const connection = new signalR.HubConnectionBuilder()
-			.withUrl("http://localhost:5000/messageHub")
-			.build();
-
-		connection.on("ReceiveMessage", (user, message) => {
-			const li = document.createElement("li");
-			li.textContent = `${user}: ${message}`;
-			document.getElementById("messageList").appendChild(li);
-		});
-
-		connection.start().catch(err => console.error("SignalR Error: ", err));
-
-		// 定期從後端拉取 Kafka 緩存消息
-		async function fetchMessages() {
-			try {
-				const response = await fetch("http://localhost:5000/api/messages");
-				const messages = await response.json();
-
-				const messageList = document.getElementById("messageList");
-				messageList.innerHTML = ""; // 清空舊消息列表
-
-				if (messages.length === 0) {
-					// 當消息為空時顯示提示
-					const li = document.createElement("li");
-					li.textContent = "暫無數據";
-					li.className = "loading";
-					messageList.appendChild(li);
-				} else {
-					messages.forEach(message => {
-						const li = document.createElement("li");
-						li.textContent = message;
-						messageList.appendChild(li);
-					});
-				}
-			} catch (error) {
-				console.error("Fetch Error:", error);
-			}
-		}
-
-		setInterval(fetchMessages, 2000); // 每 2 秒拉取一次消息
-	</script>
-</body>
-</html>-->
-<!--lastest version_250106_1711-->
-<!--<!DOCTYPE html>
-<html lang="en">
-<head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Dashboard</title>
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-	<style>
-		body {
-			background-color: #f4f4f9;
-		}
-
-		.dashboard-header {
-			background-color: #005387;
-			color: white;
-			padding: 1rem;
-			text-align: center;
-		}
-
-		.dashboard-container {
-			margin: 2rem auto;
-			max-width: 1200px;
-		}
-
-		.card {
-			border: none;
-			border-radius: 8px;
-			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-		}
-
-		.chart-container {
-			position: relative;
-			height: 300px;
-			width: 100%;
-		}
-
-		.donut-chart {
-			position: relative;
-			height: 200px;
-			width: 200px;
-			margin: auto;
-		}
-
-		.sidebar {
-			width: 250px;
-			position: fixed;
-			top: 0;
-			left: 0;
-			background-color: #005387;
-			color: white;
-			height: 100%;
-			padding-top: 20px;
-		}
-
-			.sidebar a {
-				display: block;
-				color: white;
-				padding: 10px 20px;
-				text-decoration: none;
-			}
-
-				.sidebar a:hover {
-					background-color: #0073e6;
-				}
-
-		.content {
-			margin-left: 260px;
-			padding: 20px;
-		}
-	</style>
-</head>
-<body>
-	<div class="sidebar">
+	<!--Sidebar-->
+	<!--<div class="sidebar">
 		<a href="index.html">Home</a>
 		<a href="kafka-dashboard.html">Kafka Messages</a>
-	</div>
-	<div class="content">
-		<header class="dashboard-header">
-			<h1>Dashboard</h1>
-			<p>能耗總覽 | 智慧能耗管理 | 資料分析</p>
-		</header>
 
-		<div class="dashboard-container">
-			<div class="row g-4">
-				<div class="col-md-4">
-					<div class="card">
-						<div class="card-body text-center">
-							<h5 class="card-title">空調系統能效 (kW/RT)</h5>
-							<canvas id="gaugeChart1" class="donut-chart"></canvas>
-							<p>即時值: <span id="gaugeValue1">7.1</span></p>
-						</div>
-					</div>
-				</div>
-				<div class="col-md-4">
-					<div class="card">
-						<div class="card-body text-center">
-							<h5 class="card-title">壓縮系統能效 (kW/CMM)</h5>
-							<canvas id="gaugeChart2" class="donut-chart"></canvas>
-							<p>即時值: <span id="gaugeValue2">7.1</span></p>
-						</div>
-					</div>
-				</div>
-				<div class="col-md-4">
-					<div class="card">
-						<div class="card-body text-center">
-							<h5 class="card-title">生產設備待機用電 (kWh)</h5>
-							<canvas id="donutChart"></canvas>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="row g-4 mt-4">
-				<div class="col-md-6">
-					<div class="card">
-						<div class="card-body">
-							<h5 class="card-title">目標值 vs 實際值 (kWh)</h5>
-							<div class="chart-container">
-								<canvas id="barChart1"></canvas>
-							</div>
-						</div>
-					</div>
-				</div>
-				<div class="col-md-6">
-					<div class="card">
-						<div class="card-body">
-							<h5 class="card-title">目標值 vs 實際值 (kW)</h5>
-							<div class="chart-container">
-								<canvas id="barChart2"></canvas>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
+		<div style="position: absolute; bottom: 20px; width: 100%; text-align: center;">
+			<button id="logout-btn" style="padding: 10px; background-color: red; color: white; border: none; width: 80%; cursor: pointer;">
+				登出
+			</button>
 		</div>
-	</div>
 
+	</div>-->
+	<!-- Example: index.html -->
+	<div id="sidebar-container"></div>
 	<script>
-		// Initialize Charts
-		const initDonutChart = (ctx, data, labels) => {
-			new Chart(ctx, {
-				type: 'doughnut',
-				data: {
-					labels: labels,
-					datasets: [{
-						data: data,
-						backgroundColor: ['#4caf50', '#f44336', '#2196f3'],
-					}]
-				},
-				options: {
-					responsive: true,
-					plugins: {
-						legend: { position: 'top' },
-					}
-				}
-			});
-		};
-
-		const initBarChart = (ctx, labels, data) => {
-			new Chart(ctx, {
-				type: 'bar',
-				data: {
-					labels: labels,
-					datasets: [{
-						label: '目標值',
-						data: data[0],
-						backgroundColor: '#2196f3',
-					}, {
-						label: '實際值',
-						data: data[1],
-						backgroundColor: '#4caf50',
-					}]
-				},
-				options: {
-					responsive: true,
-					scales: {
-						x: { grid: { display: false } },
-						y: { beginAtZero: true }
-					}
-				}
-			});
-		};
-
-		document.addEventListener('DOMContentLoaded', () => {
-			const donutCtx = document.getElementById('donutChart').getContext('2d');
-			const barCtx1 = document.getElementById('barChart1').getContext('2d');
-			const barCtx2 = document.getElementById('barChart2').getContext('2d');
-
-			const donutData = [35.58, 33.83, 30.59];
-			const barLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-			const barData = [
-				[105000, 109000, 110000, 115000, 120000, 125000, 130000, 135000, 140000, 145000, 150000, 155000],
-				[85000, 89000, 90000, 95000, 100000, 110000, 120000, 125000, 130000, 135000, 140000, 145000]
-			];
-
-			initDonutChart(donutCtx, donutData, ['生產用電', '待機用電', '其他']);
-			initBarChart(barCtx1, barLabels, barData);
-			initBarChart(barCtx2, barLabels, barData);
-		});
+		// 加載 Sidebar
+		fetch("sidebar.html")
+			.then(response => response.text())
+			.then(data => {
+				document.getElementById("sidebar-container").innerHTML = data;
+			})
+			.catch(error => console.error("Error loading sidebar:", error));
 	</script>
-</body>
-</html>-->
 
 
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Dashboard</title>
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-	<link href="css/styles.css" rel="stylesheet"> <!-- 引用公共樣式 -->
-</head>
-<body>
-	<!-- Sidebar -->
-	<div class="sidebar">
-		<a href="index.html">Home</a>
-		<a href="kafka-dashboard.html">Kafka Messages</a>
-	</div>
-
-	<!-- Content -->
+	<!--Content-->
 	<div class="content">
-		<header class="dashboard-header">
-			<h1>Dashboard</h1>
-			<p>能耗總覽 | 智慧能耗管理 | 資料分析</p>
+		<header class="header">
+			<h1>綠色智慧工廠平台</h1>
+			<p>
+				<a href="energy-overview.html" style="text-decoration: none; color: inherit;">能耗總覽</a> |
+				<a href="#" style="text-decoration: none; color: inherit;">智慧能耗管理</a> |
+				<a href="#" style="text-decoration: none; color: inherit;">資料分析</a>|
+				<a href="#" style="text-decoration: none; color: inherit;">智能巡檢 </a>|
+				<a href="#" style="text-decoration: none; color: inherit;">報警與工單</a>|
+				<a href="#" style="text-decoration: none; color: inherit;">專家庫</a>
+			</p>
+
+			<div id="user-info" style="text-align: right;">
+				歡迎，<span id="username">訪客</span>
+			</div>
 		</header>
 
 		<div class="dashboard-container">
@@ -659,6 +111,74 @@
 
 	<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
 	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-	<script src="js/index.js"></script> <!-- 引用 JS 文件 -->
+	<script src="https://cdn.jsdelivr.net/npm/chartjs-gauge"></script>
+	<script src="js/index.js"></script>
 </body>
 </html>
+
+
+
+<!--<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Dashboard</title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+	<link href="css/styles.css" rel="stylesheet">
+</head>
+<body>-->
+	 <!--Sidebar--> 
+	<!--<div class="sidebar">
+		<a href="index.html">Home</a>
+		<a href="kafka-dashboard.html">Kafka Messages</a>
+	</div>-->
+
+	 <!--Content--> 
+	<!--<div class="content">
+		<header class="dashboard-header">
+			<h1>Dashboard</h1>
+			<p>
+				<a href="energy-overview.html" id="energy-overview-link" style="text-decoration: none; color: inherit;">能耗總覽</a> |
+				<a href="#" style="text-decoration: none; color: inherit;">智慧能耗管理</a> |
+				<a href="#" style="text-decoration: none; color: inherit;">資料分析</a>
+			</p>
+		</header>-->
+		 <!--Dynamic Content--> 
+		<!--<div id="dynamic-content" class="dashboard-container">
+			<div class="row g-4">
+				<div class="col-md-4">
+					<div class="card">
+						<div class="card-body text-center">
+							<h5 class="card-title">空調系統能效 (kW/RT)</h5>
+							<canvas id="gaugeChart1" class="donut-chart"></canvas>
+							<p>即時值: <span id="gaugeValue1">7.1</span></p>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-4">
+					<div class="card">
+						<div class="card-body text-center">
+							<h5 class="card-title">壓縮系統能效 (kW/CMM)</h5>
+							<canvas id="gaugeChart2" class="donut-chart"></canvas>
+							<p>即時值: <span id="gaugeValue2">7.1</span></p>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-4">
+					<div class="card">
+						<div class="card-body text-center">
+							<h5 class="card-title">生產設備待機用電 (kWh)</h5>
+							<canvas id="donutChart"></canvas>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+	<script src="js/index.js"></script>  此處為 JavaScript 
+</body>
+</html>-->

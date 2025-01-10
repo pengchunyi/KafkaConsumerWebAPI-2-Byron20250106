@@ -38,7 +38,7 @@ function updateMessageList() {
 
 // 連接 SignalR Hub
 const connection = new signalR.HubConnectionBuilder()
-    .withUrl("http://localhost:5000/messageHub")
+    .withUrl("/messageHub") // 修改路徑為相對 API
     .build();
 
 connection.on("ReceiveMessage", (user, message) => {
@@ -53,7 +53,7 @@ connection.start().catch(err => console.error("SignalR Error: ", err));
 // 定期從後端拉取 Kafka 緩存消息
 async function fetchMessages() {
     try {
-        const response = await fetch("http://localhost:5000/api/messages");
+        const response = await fetch("/api/messages"); // 修改路徑為相對 API
         const messages = await response.json();
 
         // 如果有新數據則更新緩存

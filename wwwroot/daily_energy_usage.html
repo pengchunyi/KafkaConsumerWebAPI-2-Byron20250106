@@ -1,0 +1,136 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consumption Overview</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .overview-container {
+            width: 80%;
+            margin: 20px 0;
+            text-align: center;
+            background-color: #f0f8ff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .total-consumption {
+            font-size: 24px;
+            font-weight: bold;
+            color: #0073e6;
+        }
+
+        .chart-container {
+            width: 80%;
+            margin-top: 20px;
+        }
+
+        canvas {
+            max-width: 100%;
+            height: 300px;
+        }
+    </style>
+</head>
+<body>
+    <div id="sidebar-container"></div>
+    <script>
+        // 加載 Sidebar
+        fetch("sidebar.html")
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById("sidebar-container").innerHTML = data;
+            })
+            .catch(error => console.error("Error loading sidebar:", error));
+    </script>
+
+
+    <!-- 累加總量顯示區域 -->
+   <div class="overview-container">
+        <h1>Electrical Energy</h1>
+        <p>Daily Total Consumption</p>
+        <div class="total-consumption" id="totalConsumption"></div>
+    </div>
+
+    <!-- 條形圖區域 -->
+   <div class="chart-container">
+        <canvas id="myChart"></canvas>
+    </div>
+
+    <script>
+        // 條形圖數據
+        const data = [1, 4, 6.5, 7.8, 10, 11.5, 7.8, 8.1, 9.2, 9.5, 6.9, 4.1, 1];
+        const labels = [
+            '8:00 AM', '9:00 AM', '10:00 AM', '11:00 AM', '12:00 AM', '1:00 PM',
+            '2:00 PM', '3:00 PM', '4:00 PM', '5:00 PM', '6:00 PM', '7:00 PM', '8:00 PM'
+        ];
+
+        // 計算累加總量
+        const total = data.reduce((acc, value) => acc + value, 0);
+
+        // 顯示累加總量
+        document.getElementById('totalConsumption').innerText = `${total.toFixed(2)} kWh`;
+
+        // 創建條形圖
+        const ctx = document.getElementById('myChart').getContext('2d');
+        const chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Consumption (kWh)',
+                    data: data,
+                    backgroundColor: function (context) {
+                        const value = context.dataset.data[context.dataIndex];
+                        const ratio = value / 10; // 假設最大值為 10
+                        const red = Math.round(255 * ratio);
+                        const green = Math.round(255 * (1 - ratio));
+                        return `rgba(${red}, ${green}, 0, 0.8)`;
+                    },
+                    borderColor: 'rgba(0, 0, 0, 0.8)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Consumption (kWh)'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Hour'
+                        }
+                    }
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: function () {
+                            const now = new Date();
+                            const date = now.toLocaleDateString();
+                            return `Consumption for ${date}`;
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

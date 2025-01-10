@@ -48,6 +48,22 @@ app.UseCors(); // 必須在 UseRouting() 之前調用
 // 配置路由
 app.UseRouting();
 //app.MapControllers();
+
+//20250110新增================================================
+// 設置登入頁的預設路徑
+app.Use(async (context, next) =>
+{
+	// 檢查是否是根路徑並跳轉到 login.html
+	if (context.Request.Path == "/")
+	{
+		context.Response.Redirect("/login.html");
+		return;
+	}
+	await next();
+});
+//20250110新增================================================
+
+
 //250103新增=====================
 app.UseEndpoints(endpoints =>
 {

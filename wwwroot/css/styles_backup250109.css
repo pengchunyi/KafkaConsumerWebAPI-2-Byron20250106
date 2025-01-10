@@ -1,0 +1,296 @@
+﻿/*body {
+	background-color: #f4f4f9;
+	font-family: Arial, sans-serif;
+}
+
+.sidebar {
+	width: 250px;
+	position: fixed;
+	top: 0;
+	left: 0;
+	background-color: #005387;
+	color: white;
+	height: 100%;
+	padding-top: 20px;
+}
+
+	.sidebar a {
+		display: block;
+		color: white;
+		padding: 10px 20px;
+		text-decoration: none;
+	}
+
+		.sidebar a:hover {
+			background-color: #0073e6;
+		}
+
+.content {
+	margin-left: 260px;
+	padding: 20px;
+}
+
+.card {
+	border: none;
+	border-radius: 8px;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	background-color: white;
+}
+
+ul#messageList {
+	list-style-type: none;
+	padding: 0;
+	margin: 0;
+}
+
+	ul#messageList li {
+		background-color: #ffffff;
+		border: 1px solid #ddd;
+		border-radius: 5px;
+		padding: 1rem;
+		margin: 0.5rem 0;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+		transition: background-color 0.3s;
+	}
+
+		ul#messageList li:hover {
+			background-color: #f9f9f9;
+		}
+
+.loading {
+	color: #999;
+	font-size: 1.1rem;
+	text-align: center;
+	margin-top: 1rem;
+}
+
+footer {
+	text-align: center;
+	margin-top: 2rem;
+	font-size: 0.9rem;
+	color: #888;
+}
+*/
+
+
+
+/* 通用樣式 */
+/*body {
+	background-color: #f4f4f9;
+	font-family: Arial, sans-serif;
+	margin: 0;
+	padding: 0;
+}
+
+.sidebar {
+	width: 250px;
+	position: fixed;
+	top: 0;
+	left: 0;
+	background-color: #005387;
+	color: white;
+	height: 100%;
+	padding-top: 20px;
+}
+
+	.sidebar a {
+		display: block;
+		color: white;
+		padding: 10px 20px;
+		text-decoration: none;
+		font-size: 1rem;
+	}
+
+		.sidebar a:hover {
+			background-color: #0073e6;
+		}
+
+.content {
+	margin: 0;
+	padding: 20px;
+	margin-left: 260px;*/ /* 和 sidebar 的寬度保持一致 */
+/*}
+
+.dashboard-header {
+	background-color: #005387;
+	color: white;
+	padding: 1rem;
+	text-align: center;
+	font-size: 1.8rem;
+}
+
+footer {
+	text-align: center;
+	margin-top: 2rem;
+	font-size: 0.9rem;
+	color: #888;
+}
+
+.card {
+	border: none;
+	border-radius: 8px;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	background-color: white;
+	padding: 1rem;
+	margin: 1rem 0;
+}*/
+
+
+/* 通用樣式 */
+/*body {
+	background-color: #f4f4f9;*/ /* 背景色 */
+	/*margin: 0;
+	padding: 0;
+	font-family: Arial, sans-serif;
+}*/
+
+/* 通用 header 樣式 */
+/*header {
+	margin: 0;
+	padding: 0;
+}*/
+
+/* Sidebar 樣式 */
+/*.sidebar {
+	width: 250px;
+	position: fixed;
+	top: 0;
+	left: 0;
+	background-color: #005387;*/ /* 深藍色 */
+	/*color: white;
+	height: 100%;
+	padding-top: 20px;
+}
+
+	.sidebar a {
+		display: block;
+		color: white;*/ /* 白色文字 */
+		/*padding: 10px 20px;
+		text-decoration: none;
+	}
+
+		.sidebar a:hover {
+			background-color: #0073e6;*/ /* 亮藍色懸停效果 */
+		/*}*/
+
+/* Content 樣式 */
+/*.content {
+	margin-left: 260px;*/ /* 與 Sidebar 對齊 */
+	/*padding: 20px;*/ /* 保持內容內邊距 */
+/*}
+
+.content-full {
+	margin: 0;*/ /* 無 Sidebar 的頁面 */
+	/*padding: 20px;
+}*/
+
+/* Header 樣式 */
+/*.dashboard-header {
+	background-color: #005387;*/ /* 深藍色 */
+	/*color: white;*/ /* 白色文字 */
+	/*padding: 1rem;
+	text-align: center;
+}*/
+
+/* Card 樣式 */
+/*.card {
+	border: none;
+	border-radius: 8px;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	background-color: white;*/ /* 白色背景 */
+/*}
+
+.card-title {
+	color: #333333;*/ /* 深灰色文字 */
+/*}*/
+
+/* Footer 樣式 */
+/*footer {
+	text-align: center;
+	margin-top: 2rem;
+	font-size: 0.9rem;
+	color: #888888;*/ /* 淺灰色文字 */
+/*}*/
+
+
+body {
+	background-color: #f4f4f9;
+	font-family: Arial, sans-serif;
+}
+
+/* Sidebar 樣式 */
+.sidebar {
+	width: 250px;
+	position: fixed;
+	top: 0;
+	left: 0;
+	background-color: #005387;
+	color: white;
+	height: 100%;
+	padding-top: 20px;
+}
+
+	.sidebar a {
+		display: block;
+		color: white;
+		padding: 10px 20px;
+		text-decoration: none;
+	}
+
+		.sidebar a:hover {
+			background-color: #0073e6;
+		}
+
+/* Content 樣式 */
+.content {
+	margin-left: 260px;
+	padding: 20px;
+}
+
+.header {
+	background-color: #005387;
+	color: white;
+	padding: 1rem;
+	text-align: center;
+}
+
+.card {
+	border: none;
+	border-radius: 8px;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	background-color: white;
+}
+
+ul#messageList {
+	list-style-type: none;
+	padding: 0;
+	margin: 0;
+}
+
+	ul#messageList li {
+		background-color: #ffffff;
+		border: 1px solid #ddd;
+		border-radius: 5px;
+		padding: 1rem;
+		margin: 0.5rem 0;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+		transition: background-color 0.3s;
+	}
+
+		ul#messageList li:hover {
+			background-color: #f9f9f9;
+		}
+
+.loading {
+	color: #999;
+	font-size: 1.1rem;
+	text-align: center;
+	margin-top: 1rem;
+}
+
+footer {
+	text-align: center;
+	margin-top: 2rem;
+	font-size: 0.9rem;
+	color: #888;
+}
