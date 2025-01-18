@@ -16,25 +16,56 @@ function saveMessagesToLocalStorage() {
 }
 
 // 更新消息列表
+//function updateMessageList() {
+//    const messageList = document.getElementById("messageList");
+//    messageList.innerHTML = ""; // 清空列表
+
+//    if (cachedMessages.length === 0) {
+//        // 當沒有數據時顯示提示
+//        const li = document.createElement("li");
+//        li.textContent = "暫無數據";
+//        li.className = "loading";
+//        messageList.appendChild(li);
+//    } else {
+//        // 顯示緩存數據
+//        cachedMessages.forEach(message => {
+//            const li = document.createElement("li");
+//            li.textContent = message;
+//            messageList.appendChild(li);
+//        });
+//    }
+//}
+
+// 更新消息列表
 function updateMessageList() {
     const messageList = document.getElementById("messageList");
     messageList.innerHTML = ""; // 清空列表
 
     if (cachedMessages.length === 0) {
-        // 當沒有數據時顯示提示
         const li = document.createElement("li");
         li.textContent = "暫無數據";
         li.className = "loading";
         messageList.appendChild(li);
     } else {
-        // 顯示緩存數據
         cachedMessages.forEach(message => {
             const li = document.createElement("li");
-            li.textContent = message;
+
+            // 格式化 JSON
+            let formattedMessage;
+            try {
+                formattedMessage = JSON.stringify(JSON.parse(message), null, 4); // 格式化為多行
+            } catch (e) {
+                formattedMessage = message; // 無法格式化時保留原始內容
+            }
+
+            const pre = document.createElement("pre"); // 用 <pre> 保留格式
+            pre.textContent = formattedMessage;
+            li.appendChild(pre);
             messageList.appendChild(li);
         });
     }
 }
+
 
 // 連接 SignalR Hub
 const connection = new signalR.HubConnectionBuilder()

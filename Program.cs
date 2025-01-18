@@ -9,6 +9,10 @@ builder.WebHost.UseUrls("http://localhost:5000");
 // 註冊服務
 builder.Services.AddControllers();
 
+//250115_這是註冊mongoDB======================================
+builder.Services.AddSingleton<MongoDBService>();
+
+
 //250103新增=====================
 builder.Services.AddSignalR(); // 添加 SignalR 支持
 //250103新增=====================
@@ -28,8 +32,6 @@ builder.Services.AddCors(options =>
 	});
 });
 //250103新增=====================
-
-
 
 
 var app = builder.Build();

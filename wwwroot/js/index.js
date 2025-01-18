@@ -75,18 +75,8 @@ const initGaugeChart = (ctx, value, max) => {
 };
 
 
-
 document.addEventListener('DOMContentLoaded', () => {
-	//const gaugeCtx1 = document.getElementById('gaugeChart1').getContext('2d');
-	//const gaugeCtx2 = document.getElementById('gaugeChart2').getContext('2d');
-	const donutCtx = document.getElementById('donutChart').getContext('2d');
-	const barCtx1 = document.getElementById('barChart1').getContext('2d');
-	const barCtx2 = document.getElementById('barChart2').getContext('2d');
-
-	const gaugeValue1 = 7.1; // 儀表板1 即時值
-	const gaugeValue2 = 7.1; // 儀表板2 即時值
-	const maxGaugeValue = 10; // 儀表板最大值
-
+	// 1. 先宣告好所有要用到的「資料變數」
 	const donutData = [70, 30];
 	const barLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 	const barData = [
@@ -94,14 +84,28 @@ document.addEventListener('DOMContentLoaded', () => {
 		[85000, 89000, 90000, 95000, 100000, 110000, 120000, 125000, 130000, 135000, 140000, 145000]
 	];
 
-	//// 初始化儀表板圖表
-	//initGaugeChart(gaugeCtx1, gaugeValue1, maxGaugeValue);
-	//initGaugeChart(gaugeCtx2, gaugeValue2, maxGaugeValue);
+	// 2. 建立你的 Canvas context
+	const donutCtx = document.getElementById('donutChart').getContext('2d');
+	const barCtx1 = document.getElementById('barChart1').getContext('2d');
+	const barCtx2 = document.getElementById('barChart2').getContext('2d');
 
+	// 3. 呼叫 Donut / Bar 的初始化
 	initDonutChart(donutCtx, donutData, ['生產用電', '待機用電']);
 	initBarChart(barCtx1, barLabels, barData);
 	initBarChart(barCtx2, barLabels, barData);
+
+	// 4. 同樣地，Gauge 也是先抓 Canvas，再呼叫初始化
+	const gaugeCtx1 = document.getElementById('gaugeChart1').getContext('2d');
+	const gaugeCtx2 = document.getElementById('gaugeChart2').getContext('2d');
+
+	const gaugeValue1 = 7.1;
+	const gaugeValue2 = 7.1;
+	const maxGaugeValue = 10;
+
+	initGaugeChart(gaugeCtx1, gaugeValue1, maxGaugeValue);
+	initGaugeChart(gaugeCtx2, gaugeValue2, maxGaugeValue);
 });
+
 
 
 

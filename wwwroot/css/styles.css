@@ -3,7 +3,8 @@
 	font-family: Arial, sans-serif;
 }
 
-/* Sidebar 樣式 */
+
+/* Sidebar 展開樣式 */
 .sidebar {
 	width: 250px;
 	position: fixed;
@@ -13,24 +14,100 @@
 	color: white;
 	height: 100%;
 	padding-top: 20px;
+	transition: width 0.3s ease; /* 平滑過渡 */
+
+	display: flex; /* 新增 */
+	flex-direction: column; /* 新增 */
 }
+
+	/* 讓最底部的 logout-container 推到底 */
+	.logout-container {
+		margin-top: auto; /* 自動推到最下面 */
+	}
+
+/* 針對 #logout-link 如果想要有額外樣式可自行加 */
+	#logout-link {
+		display: block;
+		text-align: center;
+		padding: 10px 20px;
+		text-decoration: none;
+		color: white;
+		background-color: #005387;
+	}
+	
+	
+	/* Sidebar 收縮樣式 */
+	.sidebar.collapsed {
+		width: 0; /* 收起後寬度為 0 */
+		overflow: hidden; /* 隱藏多餘內容 */
+	}
 
 	.sidebar a {
 		display: block;
 		color: white;
 		padding: 10px 20px;
 		text-decoration: none;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
 	}
 
 		.sidebar a:hover {
 			background-color: #0073e6;
 		}
 
+	/* Log Out 按鈕放到底部 */
+	.sidebar #logout-link {
+		margin-top: auto; /* 自動推動到側邊欄底部 */
+		background-color: #005387;
+		text-align: center;
+		padding: 10px 20px;
+	}
+
+		.sidebar #logout-link:hover {
+			background-color: #0073e6;
+		}
+
+/* Toggle 按鈕樣式 */
+.toggle-button {
+	position: fixed;
+	top: 20px; /* 保持在頂部 */
+	left: 250px; /* 初始位置在 Sidebar 右邊緣 */
+	background-color: #005387;
+	color: white;
+	border: 2px solid white; /* 添加白色邊框 */
+	font-size: 1.2rem;
+	padding: 10px 15px;
+	cursor: pointer;
+	border-radius: 5px;
+	z-index: 1000; /* 確保在最上層 */
+	transition: left 0.3s ease; /* 平滑過渡 */
+}
+
+	/* 當鼠標懸停時的樣式 */
+	.toggle-button:hover {
+		background-color: #0073e6; /* 更亮的藍色背景 */
+		border-color: white; /* 邊框保持白色 */
+	}
+
+
+/* 當 Sidebar 收縮時調整按鈕位置 */
+.sidebar.collapsed + .toggle-button {
+	left: 10px; /* 收縮後的按鈕位置 */
+}
+
 /* Content 樣式 */
 .content {
-	margin-left: 260px;
+	margin-left: 260px; /* 與側邊欄的寬度保持一致 */
 	padding: 20px;
+	transition: margin-left 0.3s ease; /* 添加平滑的縮放效果 */
 }
+
+	/* Content 區域在 Sidebar 收縮時調整 */
+	.content.collapsed {
+		margin-left: 50px; /* 縮小後留出少許空間 */
+		transition: margin-left 0.3s ease;
+	}
 
 .header {
 	background-color: #005387;

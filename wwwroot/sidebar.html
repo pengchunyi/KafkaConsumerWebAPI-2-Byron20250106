@@ -1,18 +1,65 @@
 ﻿<!-- sidebar.html -->
-<div class="sidebar">
+<div class="sidebar" id="sidebar">
     <a href="index.html">Home</a>
     <a href="kafka-dashboard.html">Kafka Messages</a>
     <a href="daily_energy_usage.html">Daily Energy Usage</a>
     <a href="energy-overview.html">Energy Overview</a>
-    <a href="login.html">Log In</a>
-    <a href="#" id="logout-link">Log Out</a>
+    <a href="RealTimeStoveDataDisplay.html">Real-Time Stove Data</a>
+    <a href="production_schedule.html">Weekly_Production_Schedule</a>
+
+
+
+
+    <!-- 將 Log Out 連結放到底部 -->
+    <div class="logout-container">
+        <a href="login.html" id="logout-link">Log Out</a>
+    </div>
 </div>
 
+
+
+<!-- Toggle 按鈕 -->
+<button class="toggle-button" id="toggle-button">&lt;</button> <!-- 初始狀態下顯示 "<" -->
+
 <script>
-    // 添加登出功能
-    document.getElementById("logout-link").addEventListener("click", () => {
-        alert("Logging out...");
-        // 這裡可以調用登出 API 或者清理本地存儲後跳轉
-        window.location.href = "login.html";
+    // 切換側邊欄展開/收起
+    const sidebar = document.getElementById("sidebar");
+    const toggleButton = document.getElementById("toggle-button");
+    const content = document.querySelector(".content");
+	const logoutLink = document.getElementById("logout-link");
+
+    //toggleButton.addEventListener("click", () => {
+    //    sidebar.classList.toggle("collapsed");
+    //    content.classList.toggle("collapsed");
+
+    //    // 根據狀態切換按鈕圖示
+    //    if (sidebar.classList.contains("collapsed")) {
+    //        toggleButton.innerHTML = "&gt;"; // 收起時顯示 ">"
+    //    } else {
+    //        toggleButton.innerHTML = "&lt;"; // 展開時顯示 "<"
+    //    }
+    //});
+
+
+	// 切換側邊欄展開/收合
+	toggleButton.addEventListener("click", () => {
+		sidebar.classList.toggle("collapsed");
+		content && content.classList.toggle("collapsed"); // content 可能有些頁面沒有，就保險處理
+		toggleButton.innerHTML = sidebar.classList.contains("collapsed") ? "&gt;" : "&lt;";
     });
+
+
+	// 登出功能（若需要可加上清除 token 或 sessionStorage 的程式）
+	logoutLink.addEventListener("click", (e) => {
+		e.preventDefault();
+		alert("Logging out...");
+		window.location.href = "login.html";
+	});
+
+    //// 添加登出功能
+    //document.getElementById("logout-link").addEventListener("click", () => {
+    //    alert("Logging out...");
+    //    // 可添加清除用戶數據邏輯
+    //    window.location.href = "login.html";
+    //});
 </script>

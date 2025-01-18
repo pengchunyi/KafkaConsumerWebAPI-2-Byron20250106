@@ -67,10 +67,4 @@ public class MessagesController : ControllerBase
 		}
 	}
 
-
-
-
-
-
-
 }

@@ -7,6 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="cs_backup_repo\KafkaConsumerService_250115_backup.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Remove="wwwroot\backup_repo\clone_loginPage.html" />
+    <Content Remove="wwwroot\backup_repo\energy-overview_250115_backup.html" />
+    <Content Remove="wwwroot\backup_repo\index_backup.html" />
+    <Content Remove="wwwroot\backup_repo\kafka-dashboard_250115_backup.html" />
+    <Content Remove="wwwroot\backup_repo\RealTimeStoveDataDisplay_250115_backup.html" />
     <Content Remove="wwwroot\css\styles_backup250109.css" />
     <Content Remove="wwwroot\index_250109backup.html" />
     <Content Remove="wwwroot\js\index_250109.js" />
@@ -15,7 +24,14 @@
   <ItemGroup>
     <PackageReference Include="Confluent.Kafka" Version="2.6.1" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0" />
+    <PackageReference Include="MongoDB.Driver" Version="3.1.0" />
+    <PackageReference Include="RabbitMQ.Client" Version="7.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="cs_backup_repo\" />
+    <Folder Include="wwwroot\backup_repo\" />
   </ItemGroup>
 
 </Project>
