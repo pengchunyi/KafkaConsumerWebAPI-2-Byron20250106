@@ -69,7 +69,7 @@ function updateMessageList() {
 
 // 連接 SignalR Hub
 const connection = new signalR.HubConnectionBuilder()
-    .withUrl("/messageHub") // 修改路徑為相對 API
+    .withUrl("/hub/messageHub") // 修改路徑為相對 API
     .build();
 
 connection.on("ReceiveMessage", (user, message) => {

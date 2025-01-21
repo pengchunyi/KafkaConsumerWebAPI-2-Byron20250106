@@ -1,0 +1,609 @@
+﻿<!--<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>錫爐實時數據</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .real-time-table {
+            width: 95%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            font-size: 1.2rem;
+        }
+
+            .real-time-table th,
+            .real-time-table td {
+                border: 1px solid #ddd;
+                text-align: center;
+                padding: 10px;
+            }
+
+            .real-time-table th {
+                background-color: #005387;
+                color: white;
+            }
+
+        .status {
+            font-weight: bold;
+        }
+
+            .status.normal {
+                color: green;
+            }
+
+            .status.stop {
+                color: red;
+            }
+
+        .status-container {
+            margin: 20px auto;
+            text-align: center;
+        }
+
+            .status-container h1 {
+                background-color: #005387;
+                color: white;
+                padding: 20px;
+                border-radius: 5px;
+                margin-bottom: 20px;
+            }
+    </style>
+</head>
+<body>-->
+<!-- Sidebar -->
+<!--<div id="sidebar-container"></div>
+<script>
+    // 動態載入側邊欄
+    fetch("sidebar.html")
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Network response was not ok");
+            }
+            return response.text();
+        })
+        .then(data => {
+            document.getElementById("sidebar-container").innerHTML = data;
+        })
+        .catch(error => console.error("Error loading sidebar:", error));
+</script>-->
+<!-- Page Title -->
+<!--<div class="status-container">
+    <h1>錫爐實時數據</h1>
+    <p>當前時間: <span id="current-time"></span></p>
+</div>-->
+<!-- Table -->
+<!--<div class="content">
+    <table class="real-time-table">
+        <thead>
+            <tr>
+                <th>項目</th>
+                <th colspan="3">電流 (A)</th>
+                <th colspan="3">有功功率 (W)</th>
+                <th colspan="3">當前溫度 (°C)</th>
+                <th>當天用電量 (kWh)</th>
+                <th>開關狀態</th>
+                <th>運行狀態</th>
+            </tr>
+            <tr>
+                <th></th>
+                <th>A 相</th>
+                <th>B 相</th>
+                <th>C 相</th>
+
+                <th>A 相</th>
+                <th>B 相</th>
+                <th>C 相</th>
+
+                <th>A 相</th>
+                <th>B 相</th>
+                <th>C 相</th>
+                <th></th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody id="data-rows">-->
+<!-- 這裡會動態插入三行 (總電源, 預熱, 錫槽) -->
+<!--</tbody>
+        </table>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/5.0.15/signalr.min.js"></script>
+    <script>
+        // 每秒更新顯示當前時間
+        function updateTime() {
+            const currentTime = new Date();
+            document.getElementById("current-time").innerText = currentTime.toLocaleString();
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        // 建立 rowData，分三行：power(總電源), preheat(預熱), trough(錫槽)
+        const rowData = {
+            power: {
+                name: "總電源",
+                currentNowRYB: ["-", "-", "-"],
+                powerNowRYB: ["-", "-", "-"],
+                energyUsed: "-",
+                temperature: ["-", "-", "-"], // 當前溫度
+            },
+            preheat: {
+                name: "預熱",
+                currentNowRYB: ["-", "-", "-"],
+                powerNowRYB: ["-", "-", "-"],
+                energyUsed: "-",
+                temperature: ["-", "-", "-"], // 當前溫度
+            },
+            trough: {
+                name: "錫槽",
+                currentNowRYB: ["-", "-", "-"],
+                powerNowRYB: ["-", "-", "-"],
+                energyUsed: "-",
+                temperature: ["-", "-", "-"], // 當前溫度
+            },
+        };
+
+        function mapSourceToKey(source) {
+            if (!source) return null;
+            if (source.endsWith(".Power")) return "power";
+            if (source.endsWith(".Preheat")) return "preheat";
+            if (source.endsWith(".Trough")) return "trough";
+            return null;
+        }
+
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/hub/messageHub")
+            .build();
+
+        connection.on("ReceiveMessage", (topic, message) => {
+            console.log("Received:", topic, message);
+            const parsed = JSON.parse(message);
+
+            if (topic === "EAP.DG2.IPS.I01.DEVICE_CFX.CFX.ResourcePerformance.EnergyConsumed") {
+                const source = parsed.Data.Data.Meta.Source;
+                const key = mapSourceToKey(source);
+                if (!key) return;
+
+                const mb = parsed.Data.Data.RawData.MessageBody;
+                rowData[key].currentNowRYB = mb.CurrentNowRYB.map(x => x ?? "-");
+                rowData[key].powerNowRYB = mb.PowerNowRYB.map(x => x ?? "-");
+                rowData[key].energyUsed = mb.EnergyUsed ?? "-";
+
+                updateTable();
+            } else if (topic === "EAP.DG2.IPS.I01.DEVICE_CFX.CFX.ResourcePerformance.StationParametersModified") {
+                const source = parsed.Data.Data.Meta.Source;
+                const key = mapSourceToKey(source);
+                if (!key) return;
+
+                const modifiedParams = parsed.Data.Data.RawData.MessageBody.ModifiedParameters;
+                modifiedParams.forEach(param => {
+                    const name = param.Name;
+                    const val = param.Value;
+
+                    if (name.startsWith("OV_MainTemperature") ||
+                        name.startsWith("OV_PreheatTemperature") ||
+                        name.startsWith("OV_TinBathTemperature")) {
+                        const phase = name.slice(-1); // A, B, C
+                        const idx = phase === "A" ? 0 : phase === "B" ? 1 : 2;
+                        rowData[key].temperature[idx] = val;
+                    }
+                });
+                updateTable();
+            }
+        });
+
+        function updateTable() {
+            const tableBody = document.getElementById("data-rows");
+            let html = "";
+
+            ["power", "preheat", "trough"].forEach(key => {
+                const row = rowData[key];
+                const [cA, cB, cC] = row.currentNowRYB;
+                const [pA, pB, pC] = row.powerNowRYB;
+                const [tA, tB, tC] = row.temperature;
+                const engUsed = row.energyUsed;
+
+
+                html += `
+                        <tr>
+                            <td>${row.name}</td>
+                            <td>${cA}</td><td>${cB}</td><td>${cC}</td>
+                            <td>${pA}</td><td>${pB}</td><td>${pC}</td>
+                            <td>${tA}</td><td>${tB}</td><td>${tC}</td>
+                            <td>${engUsed}</td>
+                            <td class="status normal">合閘</td>
+                            <td class="status normal">正常</td>
+                        </tr>
+                    `;
+            });
+
+            tableBody.innerHTML = html;
+        }
+
+        connection.start()
+            .then(() => console.log("SignalR connected"))
+            .catch(err => console.error("SignalR error:", err));
+    </script>
+</body>
+</html>-->
+
+
+
+
+<!--<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>錫爐實時數據</title>
+    <link rel="stylesheet" href="css/styles.css" />
+    <style>
+        .real-time-table {
+            width: 95%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            font-size: 1.2rem;
+        }
+
+            .real-time-table th,
+            .real-time-table td {
+                border: 1px solid #ddd;
+                text-align: center;
+                padding: 10px;
+            }
+
+            .real-time-table th {
+                background-color: #005387;
+                color: white;
+            }
+
+        .status {
+            font-weight: bold;
+        }
+
+            .status.normal {
+                color: green;
+            }
+
+            .status.stop {
+                color: red;
+            }
+
+        .status-container {
+            margin: 20px auto;
+            text-align: center;
+        }
+
+            .status-container h1 {
+                background-color: #005387;
+                color: white;
+                padding: 20px;
+                border-radius: 5px;
+                margin-bottom: 20px;
+            }
+    </style>
+</head>
+<body>-->
+    <!-- 1. Sidebar -->
+    <!--<div id="sidebar-container"></div>
+    <script>
+        // 動態載入側邊欄
+        fetch("sidebar.html")
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error("Network response was not ok");
+                }
+                return response.text();
+            })
+            .then((data) => {
+                document.getElementById("sidebar-container").innerHTML = data;
+            })
+            .catch((error) => console.error("Error loading sidebar:", error));
+    </script>-->
+
+    <!-- 2. Page Title -->
+    <!--<div class="status-container">
+        <h1>錫爐實時數據</h1>
+        <p>當前時間: <span id="current-time"></span></p>
+    </div>-->
+
+    <!-- 3. Table -->
+    <!--<div class="content">
+        <table class="real-time-table">
+            <thead>
+                <tr>
+                    <th>項目</th>-->
+                    <!-- 電流 -->
+                    <!--<th colspan="3">電流 (A)</th>-->
+                    <!-- 功率 -->
+                    <!--<th colspan="3">有功功率 (W)</th>-->
+                    <!-- 當前溫度 -->
+                    <!--<th colspan="3">當前溫度 (°C)</th>-->
+                    <!-- 用電量 -->
+                    <!--<th>當天用電量 (kWh)</th>-->
+                    <!-- 開關狀態 -->
+                    <!--<th>開關狀態</th>-->
+                    <!-- 運行狀態 -->
+                    <!--<th>運行狀態</th>
+                </tr>
+                <tr>
+                    <th></th>-->
+
+                    <!-- 電流 A/B/C -->
+                    <!--<th>A 相</th>
+                    <th>B 相</th>
+                    <th>C 相</th>-->
+
+                    <!-- 功率 A/B/C -->
+                    <!--<th>A 相</th>
+                    <th>B 相</th>
+                    <th>C 相</th>-->
+
+                    <!-- 當前溫度 A/B/C -->
+                    <!--<th>A 相</th>
+                    <th>B 相</th>
+                    <th>C 相</th>
+
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody id="data-rows">-->
+                <!-- 這裡將動態插入3行: (power, preheat, trough) -->
+            <!--</tbody>
+        </table>
+    </div>-->
+
+    <!-- 4. SignalR JS -->
+    <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/5.0.15/signalr.min.js"></script>
+    <script>
+        /*********************************************
+         * 1) 每秒更新顯示當前時間
+         *********************************************/
+        function updateTime() {
+            const currentTime = new Date();
+            document.getElementById("current-time").innerText = currentTime.toLocaleString();
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        /*********************************************
+         * 2) rowData：一次包含 3 個行的資訊
+         *********************************************/
+        const rowData = {
+            // (1) 總電源
+            power: {
+                name: "總電源",
+                // 三相電流 / 功率 / 用電量
+                currentNowRYB: ["-", "-", "-"],
+                powerNowRYB: ["-", "-", "-"],
+                energyUsed: "-",
+
+                // 這裡只需要主開關溫度 => mainTemp
+                mainTemp: ["-", "-", "-"],
+
+                // 開關狀態：只有 s1 (假設 MSP_SwitchStatus1 對應 power)
+                switchStatus: { s1: "-" },
+            },
+
+            // (2) 預熱
+            preheat: {
+                name: "預熱",
+                currentNowRYB: ["-", "-", "-"],
+                powerNowRYB: ["-", "-", "-"],
+                energyUsed: "-",
+
+                // 這裡需要 mainTemp / preheatTemp / tinBathTemp？
+                // 但若實際只顯示 "預熱溫度"? 可視需要保留
+                preheatTemp: ["-", "-", "-"],
+
+                // 假設 MSP_SwitchStatus2 對應預熱
+                switchStatus: { s2: "-" },
+            },
+
+            // (3) 錫槽
+            trough: {
+                name: "錫槽",
+                currentNowRYB: ["-", "-", "-"],
+                powerNowRYB: ["-", "-", "-"],
+                energyUsed: "-",
+                tinBathTemp: ["-", "-", "-"],
+
+                // 假設 MSP_SwitchStatus3 對應錫槽
+                switchStatus: { s3: "-" },
+            },
+        };
+
+        // 小工具：EnergyConsumed 仍需判斷 Source => power/preheat/trough
+        function mapSourceToKey(source) {
+            if (!source) return null;
+            if (source.endsWith(".Power")) return "power";
+            if (source.endsWith(".Preheat")) return "preheat";
+            if (source.endsWith(".Trough")) return "trough";
+            return null;
+        }
+
+        /*********************************************
+         * 3) 建立 SignalR 連線
+         *********************************************/
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/hub/messageHub")
+            .build();
+
+        // 監聽後端推送
+        connection.on("ReceiveMessage", (topic, message) => {
+            console.log("Received:", topic, message);
+            const parsed = JSON.parse(message);
+
+            if (topic === "EAP.DG2.IPS.I01.DEVICE_CFX.CFX.ResourcePerformance.EnergyConsumed") {
+                /*********************************************
+                 * (A) EnergyConsumed：更新電流/功率/用電量
+                 *********************************************/
+                const source = parsed.Data.Data.Meta.Source;
+                const key = mapSourceToKey(source);
+                if (!key) return;
+
+                const mb = parsed.Data.Data.RawData.MessageBody;
+                rowData[key].currentNowRYB = mb.CurrentNowRYB.map(x => x ?? "-");
+                rowData[key].powerNowRYB = mb.PowerNowRYB.map(x => x ?? "-");
+                rowData[key].energyUsed = mb.EnergyUsed ?? "-";
+            }
+            else if (topic === "EAP.DG2.IPS.I01.DEVICE_CFX.CFX.ResourcePerformance.StationParametersModified") {
+                /*********************************************
+                 * (B) StationParametersModified：
+                 *     不依賴 Source，而是直接依照參數名稱，
+                 *     一次更新 power / preheat / trough 3 行
+                 *********************************************/
+                const modifiedParams = parsed.Data.Data.RawData.MessageBody.ModifiedParameters;
+
+                modifiedParams.forEach(param => {
+                    const name = param.Name;
+                    const val = param.Value;
+
+                    // 主開關溫度 => 更新 rowData.power.mainTemp
+                    if (name.startsWith("OV_MainTemperature")) {
+                        // 例如: "OV_MainTemperatureA" => A相
+                        const phase = name.slice(-1); // 'A' / 'B' / 'C'
+                        const idx = (phase === "A") ? 0 : (phase === "B") ? 1 : 2;
+                        rowData.power.mainTemp[idx] = val;
+                    }
+                    // 預熱溫度 => rowData.preheat.preheatTemp
+                    else if (name.startsWith("OV_PreheatTemperature")) {
+                        const phase = name.slice(-1);
+                        const idx = (phase === "A") ? 0 : (phase === "B") ? 1 : 2;
+                        rowData.preheat.preheatTemp[idx] = val;
+                    }
+                    // 錫槽溫度 => rowData.trough.tinBathTemp
+                    else if (name.startsWith("OV_TinBathTemperature")) {
+                        const phase = name.slice(-1);
+                        const idx = (phase === "A") ? 0 : (phase === "B") ? 1 : 2;
+                        rowData.trough.tinBathTemp[idx] = val;
+                    }
+                    // 開關狀態：1 => power, 2 => preheat, 3 => trough
+                    else if (name === "MSP_SwitchStatus1") {
+                        rowData.power.switchStatus.s1 = val;
+                    }
+                    else if (name === "MSP_SwitchStatus2") {
+                        rowData.preheat.switchStatus.s2 = val;
+                    }
+                    else if (name === "MSP_SwitchStatus3") {
+                        rowData.trough.switchStatus.s3 = val;
+                    }
+                });
+            }
+
+            // 渲染表格
+            updateTable();
+        });
+
+        /*********************************************
+         * 4) updateTable()：渲染 3 行到表格
+         *********************************************/
+        function updateTable() {
+            const tableBody = document.getElementById("data-rows");
+            let html = "";
+
+            // 順序固定：power => preheat => trough
+            ["power", "preheat", "trough"].forEach(key => {
+                const row = rowData[key];
+
+                // 三相電流
+                const [cA, cB, cC] = row.currentNowRYB;
+                // 三相功率
+                const [pA, pB, pC] = row.powerNowRYB;
+                // 用電量
+                const engUsed = row.energyUsed;
+
+                // 當前溫度：每行顯示什麼？
+                // power 行 => mainTemp
+                // preheat 行 => preheatTemp
+                // trough 行 => tinBathTemp
+                let tA = "-", tB = "-", tC = "-";
+                if (key === "power") {
+                    [tA, tB, tC] = row.mainTemp;
+                } else if (key === "preheat") {
+                    [tA, tB, tC] = row.preheatTemp;
+                } else if (key === "trough") {
+                    [tA, tB, tC] = row.tinBathTemp;
+                }
+
+                // 開關狀態：power 行看 row.power.switchStatus.s1
+                //           preheat 行看 row.preheat.switchStatus.s2
+                //           trough 行看 row.trough.switchStatus.s3
+                let switchDisplay = "-";
+                if (key === "power") {
+                    const s1 = row.switchStatus.s1;
+                    if (s1 === "-") {
+                        switchDisplay = "-";
+                    } else if (s1 === "0") {
+                        switchDisplay = "合閘";
+                    } else {
+                        switchDisplay = "斷閘";
+                    }
+                } else if (key === "preheat") {
+                    const s2 = row.switchStatus.s2;
+                    if (s2 === "-") {
+                        switchDisplay = "-";
+                    } else if (s2 === "0") {
+                        switchDisplay = "合閘";
+                    } else {
+                        switchDisplay = "斷閘";
+                    }
+                } else if (key === "trough") {
+                    const s3 = row.switchStatus.s3;
+                    if (s3 === "-") {
+                        switchDisplay = "-";
+                    } else if (s3 === "0") {
+                        switchDisplay = "合閘";
+                    } else {
+                        switchDisplay = "斷閘";
+                    }
+                }
+
+                // 運行狀態 => 此處先示範全寫死 "正常"
+                const runStatus = "正常";
+
+                html += `
+                        <tr>
+                            <td>${row.name}</td>
+
+                            <!-- 電流(A) -->
+                            <td>${cA}</td>
+                            <td>${cB}</td>
+                            <td>${cC}</td>
+
+                            <!-- 功率(W) -->
+                            <td>${pA}</td>
+                            <td>${pB}</td>
+                            <td>${pC}</td>
+
+                            <!-- 當前溫度(A/B/C) -->
+                            <td>${tA}</td>
+                            <td>${tB}</td>
+                            <td>${tC}</td>
+
+                            <!-- 用電量 -->
+                            <td>${engUsed}</td>
+
+                            <!-- 開關狀態 -->
+                            <td class="status normal">${switchDisplay}</td>
+
+                            <!-- 運行狀態 -->
+                            <td class="status normal">${runStatus}</td>
+                        </tr>
+                    `;
+            });
+
+            tableBody.innerHTML = html;
+        }
+
+        // 啟動連線
+        connection.start()
+            .then(() => console.log("SignalR connected"))
+            .catch(err => console.error("SignalR error:", err));
+    </script>
+</body>
+</html>-->

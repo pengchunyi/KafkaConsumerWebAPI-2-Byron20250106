@@ -8,6 +8,8 @@
 
   <ItemGroup>
     <Compile Remove="cs_backup_repo\KafkaConsumerService_250115_backup.cs" />
+    <Compile Remove="Services\KafkaConsumerService_250120_backup.cs" />
+    <Compile Remove="Services\KafkaConsumerService_250120_bakcup2.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -19,6 +21,8 @@
     <Content Remove="wwwroot\css\styles_backup250109.css" />
     <Content Remove="wwwroot\index_250109backup.html" />
     <Content Remove="wwwroot\js\index_250109.js" />
+    <Content Remove="wwwroot\RealTimeStoveDataDisplay_250120_backup.html" />
+    <Content Remove="wwwroot\RealTimeStoveDataDisplay_250121_backup2.html" />
   </ItemGroup>
 
   <ItemGroup>
