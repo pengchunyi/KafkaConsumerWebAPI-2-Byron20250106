@@ -44,44 +44,21 @@
     </style>
 </head>
 <body>
+    <!-- Sidebar -->
+    <!-- 引入sidebar.js -->
     <div id="sidebar-container"></div>
-    <script>
-        // 加載 Sidebar
-		fetch("sidebar.html")
-			.then(response => {
-				if (!response.ok) {
-					throw new Error("Network response was not ok");
-				}
-				return response.text();
-			})
-			.then(data => {
-				document.
-                ElementById("sidebar-container").innerHTML = data;
-
-				// 必須重新綁定事件處理器
-				const toggleButton = document.getElementById("toggle-button");
-				const sidebar = document.getElementById("sidebar");
-				const content = document.querySelector(".content");
-
-				toggleButton.addEventListener("click", () => {
-					sidebar.classList.toggle("collapsed");
-					content.classList.toggle("collapsed");
-					toggleButton.innerHTML = sidebar.classList.contains("collapsed") ? "&gt;" : "&lt;";
-				});
-			})
-			.catch(error => console.error("Error loading sidebar:", error));
-    </script>
+    <script src="js/sidebar.js"></script>
 
 
     <!-- 累加總量顯示區域 -->
-   <div class="overview-container">
+    <div class="overview-container">
         <h1>Electrical Energy</h1>
         <p>Daily Total Consumption</p>
         <div class="total-consumption" id="totalConsumption"></div>
     </div>
 
     <!-- 條形圖區域 -->
-   <div class="chart-container">
+    <div class="chart-container">
         <canvas id="myChart"></canvas>
     </div>
 

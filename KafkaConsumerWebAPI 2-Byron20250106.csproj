@@ -18,11 +18,20 @@
     <Content Remove="wwwroot\backup_repo\index_backup.html" />
     <Content Remove="wwwroot\backup_repo\kafka-dashboard_250115_backup.html" />
     <Content Remove="wwwroot\backup_repo\RealTimeStoveDataDisplay_250115_backup.html" />
+    <Content Remove="wwwroot\css\RealTimeStoveDataDisplay.css" />
     <Content Remove="wwwroot\css\styles_backup250109.css" />
+    <Content Remove="wwwroot\I01_production_line_250122_backup.html" />
+    <Content Remove="wwwroot\I01_production_line_250122_backup2.html" />
+    <Content Remove="wwwroot\I01_production_line_250123_backup.html" />
+    <Content Remove="wwwroot\I01_production_line_modular.html" />
     <Content Remove="wwwroot\index_250109backup.html" />
     <Content Remove="wwwroot\js\index_250109.js" />
+    <Content Remove="wwwroot\js\RealTimeStoveDataDisplay.css" />
+    <Content Remove="wwwroot\js\RealTimeStoveDataDisplay.js" />
     <Content Remove="wwwroot\RealTimeStoveDataDisplay_250120_backup.html" />
+    <Content Remove="wwwroot\RealTimeStoveDataDisplay_250121_backup.html" />
     <Content Remove="wwwroot\RealTimeStoveDataDisplay_250121_backup2.html" />
+    <Content Remove="wwwroot\RealTimeStoveDataDisplay_250123_backup.html" />
   </ItemGroup>
 
   <ItemGroup>

@@ -54,32 +54,10 @@
     </style>
 </head>
 <body>
+    <!-- Sidebar -->
     <div id="sidebar-container"></div>
-    <script>
-        // 加載 Sidebar
-        fetch("sidebar.html")
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error("Network response was not ok");
-                }
-                return response.text();
-            })
-            .then(data => {
-                document.getElementById("sidebar-container").innerHTML = data;
+    <script src="js/sidebar.js"></script>
 
-                // 必須重新綁定事件處理器
-                const toggleButton = document.getElementById("toggle-button");
-                const sidebar = document.getElementById("sidebar");
-                const content = document.querySelector(".content");
-
-                toggleButton.addEventListener("click", () => {
-                    sidebar.classList.toggle("collapsed");
-                    content.classList.toggle("collapsed");
-                    toggleButton.innerHTML = sidebar.classList.contains("collapsed") ? "&gt;" : "&lt;";
-                });
-            })
-            .catch(error => console.error("Error loading sidebar:", error));
-    </script>
 
     <div class="container">
         <h1>生產排程表</h1>
@@ -123,14 +101,14 @@
 
             // 依次插入每列數據
             tr.innerHTML = `
-                    <td>${row.day}</td>
-                    <td>${row.tinStart}</td>
-                    <td>${row.tinEnd}</td>
-                    <td>${row.preheatStart1}</td>
-                    <td>${row.preheatEnd1}</td>
-                    <td>${row.preheatStart2}</td>
-                    <td>${row.preheatEnd2}</td>
-                `;
+                        <td>${row.day}</td>
+                        <td>${row.tinStart}</td>
+                        <td>${row.tinEnd}</td>
+                        <td>${row.preheatStart1}</td>
+                        <td>${row.preheatEnd1}</td>
+                        <td>${row.preheatStart2}</td>
+                        <td>${row.preheatEnd2}</td>
+                    `;
 
             scheduleBody.appendChild(tr);
         });

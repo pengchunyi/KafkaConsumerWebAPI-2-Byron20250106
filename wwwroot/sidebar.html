@@ -1,57 +1,17 @@
-﻿<!-- sidebar.html -->
-<!--<div class="sidebar" id="sidebar">
+﻿<div class="sidebar" id="sidebar">
     <a href="index.html">Home</a>
     <a href="kafka-dashboard.html">Kafka Messages</a>
     <a href="daily_energy_usage.html">Daily Energy Usage</a>
     <a href="energy-overview.html">Energy Overview</a>
-    <a href="RealTimeStoveDataDisplay.html">Real-Time Stove Data</a>
-    <a href="production_schedule.html">Weekly_Production_Schedule</a>
-    <a href="I01_production_line.html">I01_production_line</a>-->
-<!-- 將 Log Out 連結放到底部 -->
-<!--<div class="logout-container">
-        <a href="login.html" id="logout-link">Log Out</a>
-    </div>
-</div>-->
-<!-- Toggle 按鈕 -->
-<!--<button class="toggle-button" id="toggle-button">&lt;</button>--> <!-- 初始狀態下顯示 "<" -->
-<!--<script>
-    // 切換側邊欄展開/收起
-    const sidebar = document.getElementById("sidebar");
-    const toggleButton = document.getElementById("toggle-button");
-    const content = document.querySelector(".content");
-    const logoutLink = document.getElementById("logout-link");
-
-
-
-    // 切換側邊欄展開/收合
-    toggleButton.addEventListener("click", () => {
-        sidebar.classList.toggle("collapsed");
-        content && content.classList.toggle("collapsed"); // content 可能有些頁面沒有，就保險處理
-        toggleButton.innerHTML = sidebar.classList.contains("collapsed") ? "&gt;" : "&lt;";
-    });
-
-
-    // 登出功能（若需要可加上清除 token 或 sessionStorage 的程式）
-    logoutLink.addEventListener("click", (e) => {
-        e.preventDefault();
-        alert("Logging out...");
-        window.location.href = "login.html";
-    });
-
-</script>-->
-
-
-<div class="sidebar" id="sidebar">
-    <a href="index.html">Home</a>
-    <a href="kafka-dashboard.html">Kafka Messages</a>
-    <a href="daily_energy_usage.html">Daily Energy Usage</a>
-    <a href="energy-overview.html">Energy Overview</a>
-    <div class="dropdown">
+    <!--<div class="dropdown">-->
         <a href="I01_production_line.html">I01_production_line</a>
-        <div class="dropdown-content">
-            <a href="RealTimeStoveDataDisplay.html">Real-Time Stove Data</a>
-        </div>
-    </div>
+        <!--<div class="dropdown-content">-->
+            <!--<a href="RealTimeStoveDataDisplay.html">Real-Time Stove Data</a>-->
+        <!--</div>-->
+    <!--</div>-->
+    <a href="production_schedule.html">production_schedule</a>
+
+
 
     <!-- 將 Log Out 連結放到底部 -->
     <div class="logout-container">
@@ -60,101 +20,6 @@
 </div>
 
 <!-- Toggle 按鈕 -->
-<button class="toggle-button" id="toggle-button">&lt;</button> <!-- 初始狀態下顯示 "<" -->
-
-<!--<style>
-    .sidebar {
-        width: 250px;
-        background-color: #333;
-        color: #fff;
-        height: 100%;
-        position: fixed;
-        left: 0;
-        top: 0;
-        overflow-y: auto;
-        transition: all 0.3s;
-    }
-
-        .sidebar a {
-            display: block;
-            color: white;
-            text-decoration: none;
-            padding: 10px;
-        }
-
-            .sidebar a:hover {
-                background-color: #575757;
-            }
-
-        .sidebar.collapsed {
-            width: 50px;
-        }
-
-    .logout-container {
-        position: absolute;
-        bottom: 10px;
-        width: 100%;
-    }
-
-    .toggle-button {
-        position: absolute;
-        top: 10px;
-        left: 250px;
-        background-color: #333;
-        color: #fff;
-        border: none;
-        cursor: pointer;
-        font-size: 18px;
-        transition: all 0.3s;
-    }
-
-        .toggle-button.collapsed {
-            left: 50px;
-        }
-
-    /* Dropdown Styles */
-    .dropdown {
-        position: relative;
-    }
-
-    .dropdown-content {
-        display: none;
-        position: relative;
-        background-color: #444444;
-        padding: 5px;
-    }
-
-    .dropdown:hover .dropdown-content {
-        display: block;
-    }
-
-    .dropdown-content a {
-        display: block;
-        color: white;
-        text-decoration: none;
-        margin: 5px 0;
-    }
-
-        .dropdown-content a:hover {
-            color: #00FF00;
-        }
-</style>-->
-
-<script>
-    // 切換側邊欄展開/收起
-    const sidebar = document.getElementById("sidebar");
-    const toggleButton = document.getElementById("toggle-button");
-    const logoutLink = document.getElementById("logout-link");
-
-    toggleButton.addEventListener("click", () => {
-        sidebar.classList.toggle("collapsed");
-        toggleButton.classList.toggle("collapsed");
-    });
-
-    // 登出功能（可根據需要處理 Token 或 Session）
-    logoutLink.addEventListener("click", (e) => {
-        e.preventDefault();
-        alert("Logging out...");
-        window.location.href = "login.html";
-    });
-</script>
+<!--初始狀態下顯示 "<"-->
+<button class="toggle-button" id="toggle-button">&lt;</button>
+<!--toggleButton.innerHTML = sidebar.classList.contains("collapsed") ? "&gt;" : "&lt;";-->

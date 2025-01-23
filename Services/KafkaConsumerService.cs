@@ -9,6 +9,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using System.Text.Json;
 
+
+using Newtonsoft.Json;
+
 namespace KafkaConsumerWebAPI.Services
 {
 	public class KafkaConsumerService : BackgroundService
@@ -118,9 +121,11 @@ namespace KafkaConsumerWebAPI.Services
 								// 最後才印出日誌
 								//Console.WriteLine($"成功消費消息，Topic: {topicName}, Relevant Data: {relevantData}");
 
-								//250121_修改為直接印出json格式的log
-								Console.WriteLine($"成功消費消息，Topic: {topicName}, Original JSON: {originalJsonString}");
-
+								////250121_修改為直接印出json格式的log
+								//Console.WriteLine($"成功消費消息，Topic: {topicName}, Original JSON: {originalJsonString}");
+								Console.WriteLine("成功消費消息，Topic: " + topicName);
+								Console.WriteLine("Original JSON: ");
+								Console.WriteLine(JsonConvert.SerializeObject(JsonConvert.DeserializeObject(originalJsonString), Formatting.Indented));
 
 
 							}

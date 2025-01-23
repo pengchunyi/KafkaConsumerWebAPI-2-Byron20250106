@@ -1,0 +1,385 @@
+﻿<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>I01生產線</title>
+    <link rel="stylesheet" href="css/styles.css" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #2D2D2D;
+            color: #FFFFFF;
+        }
+
+        .container {
+            width: 95%;
+            margin: 20px auto;
+        }
+
+        .header {
+            margin: 20px;
+            background-color: #005387;
+            padding: 10px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+            .header h1 {
+                margin: 0;
+                font-size: 2rem;
+            }
+
+        .power-box {
+            background-color: #444444;
+            padding: 15px;
+            margin: 15px auto;
+            border-radius: 10px;
+            color: #00FF00;
+            text-align: center;
+            font-size: 1.5rem;
+        }
+
+        .equipment-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            padding: 10px;
+        }
+
+        .equipment {
+            margin: 10px;
+            padding: 10px;
+            width: 150px;
+            background-color: #444444;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+            .equipment h3 {
+                font-size: 1rem;
+                margin: 5px 0;
+            }
+
+            .equipment p {
+                margin: 5px 0;
+                font-size: 0.9rem;
+            }
+
+            .equipment .status {
+                font-weight: bold;
+            }
+
+                .equipment .status.online {
+                    color: #00FF00;
+                }
+
+                .equipment .status.offline {
+                    color: #FF0000;
+                }
+    </style>
+</head>
+<body>
+ Sidebar 
+<div id="sidebar-container"></div>
+<script src="js/sidebar.js"></script>
+
+<div class="container">
+ Header 
+<div class="header">
+    <h1> DG2 I01線</h1>
+</div>
+ Power Box 
+<div class="power-box">
+    總功率: <span id="total-power">0.0</span> kW
+</div>
+ Equipment Container 
+<div class="equipment-container" id="equipment-container">
+ 动态生成设备卡片 
+</div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/5.0.15/signalr.min.js"></script>
+    <script>
+        // 定义设备列表
+        const devices = [
+            { id: "wave-solder", name: "波峰焊錫爐", source: "CFX.A00.SO20050832" },
+            { id: "auto-loader", name: "自動送板機" },
+            { id: "glue-machine", name: "自動點膠機" },
+            { id: "plugin-1", name: "RTM自動插件機1" },
+
+            { id: "plugin-2", name: "RTM自動插件機2" },
+            { id: "plugin-3", name: "RTM自動調VR機3" },
+            { id: "plugin-4", name: "RTM自動點膠機4*" },
+            { id: "plugin-5", name: "RTM自動鎖螺絲機5*" },
+            { id: "plugin-6", name: "RTM自動點膠機6*" },
+
+            { id: "plugin-7", name: "RTM自動鎖螺絲機7*" },
+            { id: "manual", name: "人工台" },
+            { id: "spray", name: "噴霧機" },
+            { id: "testing", name: "N合一自動功能測試機" },
+            { id: "packing", name: "打包台" },
+        ];
+
+        // 动态生成设备卡片
+        const container = document.getElementById("equipment-container");
+        devices.forEach(device => {
+            const div = document.createElement("div");
+            div.classList.add("equipment");
+            div.id = device.id;
+            div.innerHTML = `
+                                <h3>${device.name}</h3>
+                                <p>狀態: <span class="status offline" id="${device.id}-status">離線</span></p>
+                                <p>當天用電量: <span id="${device.id}-energy">-</span> kWh</p>
+                                <p>運行狀態: <span id="${device.id}-run">-</span></p>
+                            `;
+            container.appendChild(div);
+        });
+
+        // SignalR Setup
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/hub/messageHub")
+            .build();
+
+        /*//接收消息并更新设备状态*/
+        connection.on("ReceiveMessage", (topic, message) => {
+            const data = JSON.parse(message);
+            const source = data.Data?.Data?.Meta?.Source;
+
+            if (source) {
+                const device = devices.find(d => source === d.source);
+                if (device) {
+                    const messageBody = data.Data?.Data?.RawData?.MessageBody;
+                    if (messageBody) {
+                        // 更新对应设备数据
+                        document.getElementById(`${device.id}-status`).textContent = "合閘";
+                        document.getElementById(`${device.id}-status`).classList.remove("offline");
+                        document.getElementById(`${device.id}-status`).classList.add("online");
+
+                        //document.getElementById(`${device.id}-energy`).textContent = messageBody.EnergyUsed?.toFixed(2) || "0.0";
+                        document.getElementById(`${device.id}-energy`).textContent =
+                            messageBody.EnergyUsed ? `${messageBody.EnergyUsed.toFixed(2)} kWh` : "- kWh"; // 顯示用電量
+
+                        document.getElementById(`${device.id}-run`).textContent = "正常";
+                    }
+                }
+            }
+        });
+
+        // SignalR 接收消息並更新設備狀態
+        //connection.on("ReceiveMessage", (topic, message) => {
+        //	const data = JSON.parse(message);
+        //	const source = data.Data?.Data?.Meta?.Source?;  // 去除空格
+
+        //	// 檢查 Source 是否為 CFX.A00.SO20050832.Power
+        //	if (source === "CFX.A00.SO20050832.Power") {
+        //		const messageBody = data.Data?.Data?.RawData?.MessageBody;
+        //		if (messageBody) {
+        //			const device = devices.find(d => source === d.source);
+        //			if (device) {
+        //				// 更新設備狀態為 "合閘"
+        //				document.getElementById(`${device.id}-status`).textContent = "合閘";
+        //				document.getElementById(`${device.id}-status`).classList.remove("offline");
+        //				document.getElementById(`${device.id}-status`).classList.add("online");
+
+        //				// 顯示 EnergyUsed 作為 "當天用電量"
+        //				document.getElementById(`${device.id}-energy`).textContent =
+        //					messageBody.EnergyUsed ? `${messageBody.EnergyUsed.toFixed(2)} kWh` : "- kWh"; // 顯示用電量
+        //				document.getElementById(`${device.id}-run`).textContent = "正常";
+        //			}
+        //		}
+        //	}
+        //});
+
+
+
+
+
+
+
+        // 启动 SignalR 连接
+        connection.start()
+            .then(() => console.log("SignalR connected"))
+            .catch(err => console.error("SignalR connection error:", err));
+    </script>
+</body>
+</html>
+
+
+
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>I01生產線</title>
+    <link rel="stylesheet" href="css/styles.css" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #2D2D2D;
+            color: #FFFFFF;
+        }
+
+        .container {
+            width: 95%;
+            margin: 20px auto;
+        }
+
+        .header {
+            margin: 20px;
+            background-color: #005387;
+            padding: 10px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+            .header h1 {
+                margin: 0;
+                font-size: 2rem;
+            }
+
+        .power-box {
+            background-color: #444444;
+            padding: 15px;
+            margin: 15px auto;
+            border-radius: 10px;
+            color: #00FF00;
+            text-align: center;
+            font-size: 1.5rem;
+        }
+
+        .equipment-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            padding: 10px;
+        }
+
+        .equipment {
+            margin: 10px;
+            padding: 10px;
+            width: 150px;
+            background-color: #444444;
+            border-radius: 10px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+            .equipment h3 {
+                font-size: 1rem;
+                margin: 5px 0;
+            }
+
+            .equipment p {
+                margin: 5px 0;
+                font-size: 0.9rem;
+            }
+
+            .equipment .status {
+                font-weight: bold;
+            }
+
+                .equipment .status.online {
+                    color: #00FF00;
+                }
+
+                .equipment .status.offline {
+                    color: #FF0000;
+                }
+
+            /* Hover Effect */
+            .equipment:hover {
+                box-shadow: 0 0 15px #FFFFFF;
+                cursor: pointer;
+            }
+
+            /* 超連結卡片特殊樣式 */
+            .equipment a {
+                text-decoration: none;
+                color: inherit;
+                display: block;
+            }
+    </style>
+</head>
+<body>
+     Sidebar 
+    <div id="sidebar-container"></div>
+    <script src="js/sidebar.js"></script>
+
+    <div class="container">
+         Header 
+        <div class="header">
+            <h1> DG2 I01線</h1>
+        </div>
+
+         Power Box 
+        <div class="power-box">
+            總功率: <span id="total-power">0.0</span> kW
+        </div>
+
+         Equipment Container 
+        <div class="equipment-container" id="equipment-container">
+             动态生成设备卡片 
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/5.0.15/signalr.min.js"></script>
+    <script>
+        // 定义设备列表
+		const devices = [
+			{ id: "auto-loader", name: "自動送板機" },
+			{ id: "glue-machine", name: "自動點膠機" },
+			{ id: "plugin-1", name: "RTM自動插件機 1" },
+			{ id: "plugin-2", name: "RTM 自動插件機2" },
+			{ id: "auto-plugin", name: "自動插件機" },
+			{ id: "bending-machine", name: "折腳/扭腳一體機" },
+			{ id: "manual-1", name: "人工台" },
+			{ id: "spray", name: "噴霧機" },
+			{ id: "wave-solder", name: "波峰焊錫爐", link: "RealTimeStoveDataDisplay.html" },
+			{ id: "auto-unloader", name: "自動存板機" },
+			{ id: "inline-ict", name: "在線ICT" },
+			{ id: "manual-2", name: "人工台" },
+			{ id: "vr-machine-3", name: "RTM 自動調VR機3" },
+			{ id: "glue-machine-4", name: "RTM自動點膠機4*" },
+			{ id: "screw-machine-5", name: "RTM 自動鎖螺絲機5*" },
+			{ id: "glue-machine-6", name: "RTM 自動點膠機6*" },
+			{ id: "screw-machine-7", name: "RTM 自動鎖螺絲機7*" },
+			{ id: "testing", name: "N合一自動功能測試機" },
+			{ id: "labeling-8", name: "RTM 自動貼標機8*" },
+			{ id: "packing", name: "打包台" }
+		];
+
+
+        // 动态生成设备卡片
+        const container = document.getElementById("equipment-container");
+        devices.forEach(device => {
+            const div = document.createElement("div");
+            div.classList.add("equipment");
+            div.id = device.id;
+
+            if (device.link) {
+                div.innerHTML = `
+                        <a href="${device.link}">
+                            <h3>${device.name}</h3>
+                            <p>狀態: <span class="status offline" id="${device.id}-status">離線</span></p>
+                            <p>當天用電量: <span id="${device.id}-energy">-</span> kWh</p>
+                            <p>運行狀態: <span id="${device.id}-run">-</span></p>
+                        </a>
+                    `;
+            } else {
+                div.innerHTML = `
+                        <h3>${device.name}</h3>
+                        <p>狀態: <span class="status offline" id="${device.id}-status">離線</span></p>
+                        <p>當天用電量: <span id="${device.id}-energy">-</span> kWh</p>
+                        <p>運行狀態: <span id="${device.id}-run">-</span></p>
+                    `;
+            }
+
+            container.appendChild(div);
+        });
+    </script>
+</body>
+</html>

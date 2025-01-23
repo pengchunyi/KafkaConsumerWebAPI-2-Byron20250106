@@ -1,0 +1,43 @@
+﻿.real-time-table {
+	width: 95%;
+	margin: 20px auto;
+	border-collapse: collapse;
+	font-size: 1.2rem;
+}
+
+	.real-time-table th,
+	.real-time-table td {
+		border: 1px solid #ddd;
+		text-align: center;
+		padding: 10px;
+	}
+
+	.real-time-table th {
+		background-color: #005387;
+		color: white;
+	}
+
+.status {
+	font-weight: bold;
+}
+
+	.status.normal {
+		color: green;
+	}
+
+	.status.stop {
+		color: red;
+	}
+
+.status-container {
+	margin: 20px auto;
+	text-align: center;
+}
+
+	.status-container h1 {
+		background-color: #005387;
+		color: white;
+		padding: 20px;
+		border-radius: 5px;
+		margin-bottom: 20px;
+	}
