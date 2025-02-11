@@ -25,6 +25,7 @@
     <Content Remove="wwwroot\I01_production_line_250123_backup.html" />
     <Content Remove="wwwroot\I01_production_line_modular.html" />
     <Content Remove="wwwroot\index_250109backup.html" />
+    <Content Remove="wwwroot\js\i01_production_line_250210_backup.js" />
     <Content Remove="wwwroot\js\index_250109.js" />
     <Content Remove="wwwroot\js\RealTimeStoveDataDisplay.css" />
     <Content Remove="wwwroot\js\RealTimeStoveDataDisplay.js" />
@@ -32,6 +33,9 @@
     <Content Remove="wwwroot\RealTimeStoveDataDisplay_250121_backup.html" />
     <Content Remove="wwwroot\RealTimeStoveDataDisplay_250121_backup2.html" />
     <Content Remove="wwwroot\RealTimeStoveDataDisplay_250123_backup.html" />
+    <Content Remove="wwwroot\RealTimeStoveDataDisplay_250123_backup2.html" />
+    <Content Remove="wwwroot\RealTimeStoveDataDisplay_250210_backup.html" />
+    <Content Remove="wwwroot\RealTimeStoveDataDisplay_250210_backup2.html" />
   </ItemGroup>
 
   <ItemGroup>
@@ -45,6 +49,13 @@
   <ItemGroup>
     <Folder Include="cs_backup_repo\" />
     <Folder Include="wwwroot\backup_repo\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="wwwroot\js\i01_production_line.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>

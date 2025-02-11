@@ -1,281 +1,326 @@
-﻿using System.Collections.Concurrent;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using Confluent.Kafka;
-using KafkaConsumerWebAPI.Hubs;
-using Microsoft.AspNetCore.SignalR;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
-using System.Text.Json;
+﻿//using System.Collections.Concurrent;
+//using System.Text;
+//using System.Threading;
+//using System.Threading.Tasks;
+//using Confluent.Kafka;
+//using KafkaConsumerWebAPI.Hubs;
+//using Microsoft.AspNetCore.SignalR;
+//using Microsoft.Extensions.Configuration;
+//using Microsoft.Extensions.Hosting;
+//using System.Text.Json;
+//using Newtonsoft.Json;
+//using System;
+//using System.Linq;
+//using System.Collections.Generic;
 
+//namespace KafkaConsumerWebAPI.Services
+//{
+//	// Kafka 消費者服務，繼承自 BackgroundService 以在後台運行
+//	public class KafkaConsumerService : BackgroundService
+//	{
+//		private readonly ConcurrentQueue<string> _messageQueue;
+//		private readonly IConfiguration _configuration;
+//		private readonly IHubContext<MessageHub> _hubContext;
+//		private readonly MongoDBService _mongoDBService;
 
-using Newtonsoft.Json;
+//		private IConsumer<Ignore, byte[]>? _consumer;
 
-namespace KafkaConsumerWebAPI.Services
-{
-	public class KafkaConsumerService : BackgroundService
-	{
-		private readonly ConcurrentQueue<string> _messageQueue;
-		private readonly IConfiguration _configuration;
-		private readonly IHubContext<MessageHub> _hubContext;
-		private readonly MongoDBService _mongoDBService;
+//		public KafkaConsumerService(
+//			ConcurrentQueue<string> messageQueue,
+//			IConfiguration configuration,
+//			IHubContext<MessageHub> hubContext,
+//			MongoDBService mongoDBService)
+//		{
+//			_messageQueue = messageQueue;
+//			_configuration = configuration;
+//			_hubContext = hubContext;
+//			_mongoDBService = mongoDBService;
+//		}
 
-		private IConsumer<Ignore, byte[]>? _consumer;
+//		/// <summary>
+//		/// 範例：如要回溯 2025-02-07 一整天，可使用 OffsetsForTimes。
+//		/// 這裡示範 Earliest + SeekToTargetDateOffsets => 回溯指定日期
+//		/// </summary>
+//		private void SeekToTargetDateOffsets(IConsumer<Ignore, byte[]> consumer, DateTime targetStartUtc)
+//		{
+//			var partitions = consumer.Assignment;
+//			// 為每個分區建立一個查詢時間點
+//			var timestampsToSearch = partitions
+//				.Select(tp => new TopicPartitionTimestamp(tp, new Timestamp(targetStartUtc, TimestampType.CreateTime)))
+//				.ToList();
+//			// 根據查詢時間取得各分區的 offset
+//			var offsetsForTimes = consumer.OffsetsForTimes(timestampsToSearch, TimeSpan.FromSeconds(10));
+//			foreach (var tpOffset in offsetsForTimes)
+//			{
+//				if (tpOffset.Offset != Offset.Unset)
+//				{
+//					consumer.Seek(tpOffset);
+//				}
+//			}
+//		}
 
-		public KafkaConsumerService(
-			ConcurrentQueue<string> messageQueue,
-			IConfiguration configuration,
-			IHubContext<MessageHub> hubContext,
-			MongoDBService mongoDBService)
-		{
-			_messageQueue = messageQueue;
-			_configuration = configuration;
-			_hubContext = hubContext;
-			_mongoDBService = mongoDBService;
-		}
+//		protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+//		{
+//			var kafkaConfig = _configuration.GetSection("Kafka");
 
-		// 調整 Consumer Group 偏移量到最新
-		private void SeekToLatestOffsets(IConsumer<Ignore, byte[]> consumer)
-		{
-			foreach (var partition in consumer.Assignment)
-			{
-				try
-				{
-					// 查詢分區的最新偏移量
-					var offsets = consumer.QueryWatermarkOffsets(partition, TimeSpan.FromSeconds(10));
+//			var consumerConfig = new ConsumerConfig
+//			{
+//				GroupId = kafkaConfig["GroupId"],
+//				BootstrapServers = kafkaConfig["BootstrapServers"],
+//				SecurityProtocol = SecurityProtocol.SaslPlaintext,
+//				SaslMechanism = SaslMechanism.Plain,
+//				SaslUsername = kafkaConfig["SaslUsername"],
+//				SaslPassword = kafkaConfig["SaslPassword"],
+//				// 若要從最早消息開始 => Earliest
+//				// 若只要接收未來最新 => Latest
+//				// 若要精準回溯 -> Earliest + SeekToTargetOffsets
+//				AutoOffsetReset = AutoOffsetReset.Earliest,
+//				EnableAutoCommit = false
+//			};
 
-					// 將消費者偏移量移動到最新的偏移量
-					consumer.Seek(new TopicPartitionOffset(partition, offsets.High));
-				}
-				catch (Exception ex)
-				{
-					Console.WriteLine($"調整偏移量時發生錯誤，分區: {partition.Partition.Value}, 錯誤: {ex.Message}");
-				}
-			}
-		}
+//			var topics = new List<string>
+//			{
+//				"EAP.DG2.IPS.I01.DEVICE_CFX.CFX.ResourcePerformance.EnergyConsumed",
+//				"EAP.DG2.IPS.I01.DEVICE_CFX.CFX.ResourcePerformance.StationParametersModified"
+//			};
 
-		protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-		{
-			var kafkaConfig = _configuration.GetSection("Kafka");
+//			_consumer = new ConsumerBuilder<Ignore, byte[]>(consumerConfig)
+//				.SetValueDeserializer(Deserializers.ByteArray)
+//				.Build();
 
-			var consumerConfig = new ConsumerConfig
-			{
-				GroupId = kafkaConfig["GroupId"],
-				BootstrapServers = kafkaConfig["BootstrapServers"],
-				SecurityProtocol = SecurityProtocol.SaslPlaintext,
-				SaslMechanism = SaslMechanism.Plain,
-				SaslUsername = kafkaConfig["SaslUsername"],
-				SaslPassword = kafkaConfig["SaslPassword"],
-				AutoOffsetReset = AutoOffsetReset.Latest, // 修改為從最新的數據開始
-				EnableAutoCommit = false
-			};
+//			_consumer.Subscribe(topics);
+//			Console.WriteLine($"已訂閱以下 Kafka Topics: {string.Join(", ", topics)}");
 
-			var topics = new List<string>
-			{
-				"EAP.DG2.IPS.I01.DEVICE_CFX.CFX.ResourcePerformance.EnergyConsumed",
-				"EAP.DG2.IPS.I01.DEVICE_CFX.CFX.ResourcePerformance.StationParametersModified"
-			};
+//			// 【若要回溯 2025-02-07 (UTC+8) 的整天 => UTC+0: 2025-02-06 16:00:00
+//			var targetStartUtc = new DateTime(2025, 2, 7).Date.AddHours(-8); // 2025-02-06 16:00:00
+//																			 // 調用方法 => 調整 offset 到指定日期
+//																			 // （只示範，可自行決定要不要呼叫）
+//			await Task.Delay(1000); // 等待 consumer Assign 分區
+//			SeekToTargetDateOffsets(_consumer, targetStartUtc);
 
-			_consumer = new ConsumerBuilder<Ignore, byte[]>(consumerConfig)
-				.SetValueDeserializer(Deserializers.ByteArray)
-				.Build();
+//			await Task.Run(() => ConsumeMessages(stoppingToken), stoppingToken);
+//		}
 
-			_consumer.Subscribe(topics);
-			Console.WriteLine($"已訂閱以下 Kafka Topics: {string.Join(", ", topics)}");
+//		private async void ConsumeMessages(CancellationToken stoppingToken)
+//		{
+//			// 設定目標時間範圍 => (UTC+0) 2025-02-06 16:00:00 ~ 2025-02-07 15:59:59
+//			DateTime targetStartUtc = new DateTime(2025, 2, 7).Date.AddHours(-8);
+//			DateTime targetEndUtc = new DateTime(2025, 2, 7).Date.AddDays(1).AddHours(-8).AddTicks(-1);
 
-			// 調整偏移量到最新
-			SeekToLatestOffsets(_consumer);
+//			try
+//			{
+//				while (!stoppingToken.IsCancellationRequested)
+//				{
+//					try
+//					{
+//						var result = _consumer!.Consume(stoppingToken);
+//						if (result.Message?.Value != null)
+//						{
+//							string topicName = result.Topic;
+//							string originalJsonString = Encoding.UTF8.GetString(result.Message.Value);
 
-			await Task.Run(() => ConsumeMessages(stoppingToken), stoppingToken);
-		}
+//							// 從 JSON 提取 TimeStamp (UTC+0)
+//							DateTime messageTimestamp = ExtractTimestamp(originalJsonString);
+//							if (messageTimestamp == DateTime.MinValue)
+//							{
+//								// 代表提取失敗
+//								Console.WriteLine("未能提取 TimeStamp，略過。");
+//								continue;
+//							}
 
-		private async void ConsumeMessages(CancellationToken stoppingToken)
-		{
-			try
-			{
-				while (!stoppingToken.IsCancellationRequested)
-				{
-					try
-					{
-						var result = _consumer!.Consume(stoppingToken);
-						if (result.Message?.Value != null)
-						{
-							string topicName = result.Topic;
-							string originalJsonString = Encoding.UTF8.GetString(result.Message.Value);
+//							// 檢查是否在目標日期範圍內
+//							if (messageTimestamp >= targetStartUtc && messageTimestamp <= targetEndUtc)
+//							{
+//								// 解析成三種來源
+//								string relevantData = ExtractRelevantData(topicName, originalJsonString);
+//								if (!string.IsNullOrEmpty(relevantData) && relevantData != "數據提取失敗")
+//								{
+//									// 儲存消息到 MongoDB (有去重機制)
+//									await _mongoDBService.InsertMessageToCollectionAsync(topicName, originalJsonString);
 
-							// 解析 & 提取關鍵數據
-							string relevantData = ExtractRelevantData(topicName, originalJsonString);
+//									// (選擇性) 用 SignalR 推送
+//									await _hubContext.Clients.All.SendAsync("ReceiveMessage", topicName, originalJsonString, stoppingToken);
 
-							// 如果 relevantData 不為空，才視為「成功消費」
-							if (!string.IsNullOrEmpty(relevantData) && relevantData != "數據提取失敗")
-							{
-								// 可以在這裡先儲存到 MongoDB
-								await _mongoDBService.InsertMessageToCollectionAsync(topicName, originalJsonString);
+//									Console.WriteLine($"成功消費消息，Topic: {topicName}");
+//									Console.WriteLine("Original JSON: ");
+//									Console.WriteLine(JsonConvert.SerializeObject(JsonConvert.DeserializeObject(originalJsonString), Formatting.Indented));
+//								}
+//							}
+//							else
+//							{
+//								Console.WriteLine($"消息時間 {messageTimestamp} 不在目標範圍 {targetStartUtc:yyyy-MM-dd HH:mm:ss} ~ {targetEndUtc:yyyy-MM-dd HH:mm:ss} 內。");
+//							}
+//						}
+//					}
+//					catch (ConsumeException e)
+//					{
+//						Console.WriteLine($"Kafka 消費錯誤: {e.Error.Reason}");
+//					}
+//					catch (Exception ex)
+//					{
+//						Console.WriteLine($"處理消息時發生錯誤: {ex.Message}");
+//					}
+//				}
+//			}
+//			catch (OperationCanceledException)
+//			{
+//				Console.WriteLine("消費服務已被取消");
+//			}
+//			finally
+//			{
+//				_consumer?.Close();
+//			}
+//		}
 
-								// 再透過 SignalR 推送前端
-								//await _hubContext.Clients.All.SendAsync("ReceiveMessage", topicName, relevantData, stoppingToken);
-								await _hubContext.Clients.All.SendAsync("ReceiveMessage", topicName, originalJsonString, stoppingToken);
+//		/// <summary>
+//		/// 從 JSON 中提取 TimeStamp (Data -> Data -> RawData -> TimeStamp)
+//		/// </summary>
+//		private DateTime ExtractTimestamp(string json)
+//		{
+//			try
+//			{
+//				using var doc = JsonDocument.Parse(json);
+//				var root = doc.RootElement;
 
+//				if (root.TryGetProperty("Data", out var dataEl) &&
+//					dataEl.TryGetProperty("Data", out var innerDataEl) &&
+//					innerDataEl.TryGetProperty("RawData", out var rawDataEl) &&
+//					rawDataEl.TryGetProperty("TimeStamp", out var tsEl))
+//				{
+//					string tsString = tsEl.GetString();
+//					if (!string.IsNullOrEmpty(tsString))
+//					{
+//						return DateTime.Parse(tsString); // 假設為 UTC+0
+//					}
+//				}
+//			}
+//			catch { }
+//			return DateTime.MinValue;
+//		}
 
-								// 最後才印出日誌
-								//Console.WriteLine($"成功消費消息，Topic: {topicName}, Relevant Data: {relevantData}");
+//		/// <summary>
+//		/// 根據 Topic 解析不同資料 => EnergyConsumed or StationParametersModified
+//		/// </summary>
+//		private string ExtractRelevantData(string topic, string jsonString)
+//		{
+//			try
+//			{
+//				using var doc = JsonDocument.Parse(jsonString);
+//				var root = doc.RootElement;
 
-								////250121_修改為直接印出json格式的log
-								//Console.WriteLine($"成功消費消息，Topic: {topicName}, Original JSON: {originalJsonString}");
-								Console.WriteLine("成功消費消息，Topic: " + topicName);
-								Console.WriteLine("Original JSON: ");
-								Console.WriteLine(JsonConvert.SerializeObject(JsonConvert.DeserializeObject(originalJsonString), Formatting.Indented));
+//				if (topic == "EAP.DG2.IPS.I01.DEVICE_CFX.CFX.ResourcePerformance.EnergyConsumed")
+//				{
+//					return ParseEnergyConsumed(root);
+//				}
+//				else if (topic == "EAP.DG2.IPS.I01.DEVICE_CFX.CFX.ResourcePerformance.StationParametersModified")
+//				{
+//					return ParseStationParams(root);
+//				}
+//				else
+//				{
+//					// 不在三種來源
+//					return null;
+//				}
+//			}
+//			catch (Exception ex)
+//			{
+//				Console.WriteLine($"資料提取時發生錯誤: {ex.Message}");
+//				return "數據提取失敗";
+//			}
+//		}
 
+//		/// <summary>
+//		/// 解析 EnergyConsumed 主題: 只取 [Preheat, Trough, Power] 三種 Source
+//		/// </summary>
+//		private string ParseEnergyConsumed(JsonElement root)
+//		{
+//			var dataEl = root.GetProperty("Data").GetProperty("Data");
+//			var rawDataEl = dataEl.GetProperty("RawData");
+//			var messageBody = rawDataEl.GetProperty("MessageBody");
 
-							}
-							// else: 代表沒有興趣的數據，就「啥都不做」，不印也不存
-						}
-					}
-					catch (ConsumeException e)
-					{
-						Console.WriteLine($"Kafka 消費錯誤: {e.Error.Reason}");
-					}
-					catch (Exception ex)
-					{
-						Console.WriteLine($"處理消息時發生錯誤: {ex.Message}");
-					}
-				}
-			}
-			catch (OperationCanceledException)
-			{
-				Console.WriteLine("消費服務已被取消");
-			}
-			finally
-			{
-				_consumer?.Close();
-			}
-		}
+//			double[] currentNowRYB = messageBody.GetProperty("CurrentNowRYB")
+//												.EnumerateArray()
+//												.Select(x => x.GetDouble())
+//												.ToArray();
+//			double[] powerNowRYB = messageBody.GetProperty("PowerNowRYB")
+//											  .EnumerateArray()
+//											  .Select(x => x.GetDouble())
+//											  .ToArray();
+//			double energyUsed = messageBody.GetProperty("EnergyUsed").GetDouble();
 
+//			var metaEl = dataEl.GetProperty("Meta");
+//			string source = metaEl.GetProperty("Source").GetString() ?? "";
 
+//			// 若不屬於三種，就直接 return 空
+//			if (source != "CFX.A00.SO20050832.Trough" &&
+//				source != "CFX.A00.SO20050832.Preheat" &&
+//				source != "CFX.A00.SO20050832.Power")
+//			{
+//				return null; // 不處理
+//			}
 
+//			// 簡單組裝一下
+//			string component = source switch
+//			{
+//				"CFX.A00.SO20050832.Trough" => "錫槽",
+//				"CFX.A00.SO20050832.Preheat" => "預熱",
+//				"CFX.A00.SO20050832.Power" => "總電源",
+//				_ => source
+//			};
 
-		private string ParseEnergyConsumed(JsonElement root)
-		{
-			// 和你原本在 ExtractRelevantData 中
-			// 針對 topic == "EAP.DG2.IPS.I01.DEVICE_CFX.CFX.ResourcePerformance.EnergyConsumed"
-			// 所使用的解析邏輯一樣
+//			return $"{component} => 三相電流(A): {string.Join(", ", currentNowRYB)}, " +
+//				   $"有功功率(W): {string.Join(", ", powerNowRYB)}, " +
+//				   $"用電量(kWh): {energyUsed}";
+//		}
 
-			// 1. 定位到 Data -> Data -> RawData -> MessageBody
-			var dataEl = root.GetProperty("Data").GetProperty("Data");
-			var rawDataEl = dataEl.GetProperty("RawData");
-			var messageBody = rawDataEl.GetProperty("MessageBody");
+//		/// <summary>
+//		/// 解析 StationParametersModified
+//		/// </summary>
+//		private string ParseStationParams(JsonElement root)
+//		{
+//			try
+//			{
+//				var dataEl = root.GetProperty("Data").GetProperty("Data");
+//				var rawDataEl = dataEl.GetProperty("RawData");
+//				var messageBody = rawDataEl.GetProperty("MessageBody");
 
-			// 2. 取你需要的欄位
-			double[] currentNowRYB = messageBody.GetProperty("CurrentNowRYB")
-												.EnumerateArray()
-												.Select(x => x.GetDouble())
-												.ToArray();
-			double[] powerNowRYB = messageBody.GetProperty("PowerNowRYB")
-											  .EnumerateArray()
-											  .Select(x => x.GetDouble())
-											  .ToArray();
-			double energyUsed = messageBody.GetProperty("EnergyUsed").GetDouble();
+//				if (!messageBody.TryGetProperty("ModifiedParameters", out JsonElement modifiedParams))
+//				{
+//					return null;
+//				}
 
-			// 3. 根據 Meta.Source 判斷部件位置 (錫槽 / 預熱 / 總電源)
-			var metaEl = dataEl.GetProperty("Meta");
-			string source = metaEl.GetProperty("Source").GetString() ?? "";
-			string component = source switch
-			{
-				"CFX.A00.SO20050832.Trough" => "錫槽",
-				"CFX.A00.SO20050832.Preheat" => "預熱",
-				"CFX.A00.SO20050832.Power" => "總電源",
-				_ => source
-			};
+//				var dict = new Dictionary<string, string>();
+//				foreach (var param in modifiedParams.EnumerateArray())
+//				{
+//					string name = param.GetProperty("Name").GetString() ?? "";
+//					string value = param.GetProperty("Value").GetString() ?? "";
 
-			// 4. 組裝要顯示的字串
-			// 這裡示範格式: 錫槽 => Current(A): 5.6,5.8,5.8, Power(W): 679,770,727, EnergyUsed(kWh): 507.27
-			// 你可以依需求調整
-			return $"{component} => 三相電流(A): {string.Join(", ", currentNowRYB)}, " +
-				   $"有功功率(W): {string.Join(", ", powerNowRYB)}, " +
-				   $"用電量(kWh): {energyUsed}";
-		}
+//					// 若要再篩 Source == Trough/Preheat/Power，可以在這裡繼續判斷
+//					// 這裡先保留原本邏輯: 只處理指定欄位
+//					if (name.StartsWith("OV_MainTemperature") ||
+//						name.StartsWith("OV_PreheatTemperature") ||
+//						name.StartsWith("OV_TinBathTemperature") ||
+//						name.StartsWith("MSP_SwitchStatus"))
+//					{
+//						dict[name] = value;
+//					}
+//				}
 
-		private string ExtractRelevantData(string topic, string jsonString)
-		{
-			try
-			{
-				using var doc = JsonDocument.Parse(jsonString);
-				JsonElement root = doc.RootElement;
+//				if (dict.Count == 0)
+//					return null;
 
-				// 依照 Topic 來判斷
-				if (topic == "EAP.DG2.IPS.I01.DEVICE_CFX.CFX.ResourcePerformance.EnergyConsumed")
-				{
-					// ... 這段保持原本，你的 EnergyConsumed 解析
-					return ParseEnergyConsumed(root);
-				}
-				else if (topic == "EAP.DG2.IPS.I01.DEVICE_CFX.CFX.ResourcePerformance.StationParametersModified")
-				{
-					// 先把 relevantData 解析出來
-					string relevantData = ParseStationParams(root);
+//				string mainTemp = $"主開關溫度(°C) => A:{dict.GetValueOrDefault("OV_MainTemperatureA", "-")}, B:{dict.GetValueOrDefault("OV_MainTemperatureB", "-")}, C:{dict.GetValueOrDefault("OV_MainTemperatureC", "-")}";
+//				string preheatTemp = $"預熱溫度(°C) => A:{dict.GetValueOrDefault("OV_PreheatTemperatureA", "-")}, B:{dict.GetValueOrDefault("OV_PreheatTemperatureB", "-")}, C:{dict.GetValueOrDefault("OV_PreheatTemperatureC", "-")}";
+//				string tinBathTemp = $"錫槽溫度(°C) => A:{dict.GetValueOrDefault("OV_TinBathTemperatureA", "-")}, B:{dict.GetValueOrDefault("OV_TinBathTemperatureB", "-")}, C:{dict.GetValueOrDefault("OV_TinBathTemperatureC", "-")}";
+//				string switchStatus = $"開關狀態 => S1:{dict.GetValueOrDefault("MSP_SwitchStatus1", "-")}, S2:{dict.GetValueOrDefault("MSP_SwitchStatus2", "-")}, S3:{dict.GetValueOrDefault("MSP_SwitchStatus3", "-")}";
 
-					// 如果 relevantData 為 null 或空字串，表示不相關
-					return relevantData;
-				}
-				else
-				{
-					// 其他 Topic 不處理，回傳空
-					return null;
-				}
-			}
-			catch (Exception ex)
-			{
-				Console.WriteLine($"資料提取時發生錯誤: {ex.Message}");
-				return "數據提取失敗";
-			}
-		}
-
-
-		// 解析 StationParametersModified 的方法
-		private string ParseStationParams(JsonElement root)
-		{
-			// 1. 取得 RawData.MessageBody.ModifiedParameters (別忘了一層 Data->Data)
-			var dataEl = root.GetProperty("Data").GetProperty("Data");
-			var rawDataEl = dataEl.GetProperty("RawData");
-			var messageBody = rawDataEl.GetProperty("MessageBody");
-			var modifiedParams = messageBody.GetProperty("ModifiedParameters").EnumerateArray();
-
-			// 2. 過濾出我們關心的參數
-			//    （假設我們只關心 "OV_MainTemperatureX"、"OV_PreheatTemperatureX"、"OV_TinBathTemperatureX"、"MSP_SwitchStatusX" 等）
-			//    可以用 Dictionary<string, string> 存放。若找不到，預設就不塞入。
-			var dict = new Dictionary<string, string>();
-			foreach (var param in modifiedParams)
-			{
-				string name = param.GetProperty("Name").GetString() ?? "";
-				string value = param.GetProperty("Value").GetString() ?? "";
-
-				// 只有符合需求的才收集
-				if (name.StartsWith("OV_MainTemperature") ||
-					name.StartsWith("OV_PreheatTemperature") ||
-					name.StartsWith("OV_TinBathTemperature") ||
-					name.StartsWith("MSP_SwitchStatus"))
-				{
-					dict[name] = value;
-				}
-			}
-
-			// 3. 如果 dict 裡面完全沒包含我們想要的欄位，代表這則消息「不相關」，直接 return null 或空字串
-			if (dict.Count == 0)
-			{
-				return null;  // null 代表這則不顯示
-			}
-
-			// 4. 若有資料，就跟之前一樣組裝成一段文字
-			string mainTemp = $"主開關溫度(°C) => A:{dict.GetValueOrDefault("OV_MainTemperatureA", "-")}, B:{dict.GetValueOrDefault("OV_MainTemperatureB", "-")}, C:{dict.GetValueOrDefault("OV_MainTemperatureC", "-")}";
-			string preheatTemp = $"預熱溫度(°C) => A:{dict.GetValueOrDefault("OV_PreheatTemperatureA", "-")}, B:{dict.GetValueOrDefault("OV_PreheatTemperatureB", "-")}, C:{dict.GetValueOrDefault("OV_PreheatTemperatureC", "-")}";
-			string tinBathTemp = $"錫槽溫度(°C) => A:{dict.GetValueOrDefault("OV_TinBathTemperatureA", "-")}, B:{dict.GetValueOrDefault("OV_TinBathTemperatureB", "-")}, C:{dict.GetValueOrDefault("OV_TinBathTemperatureC", "-")}";
-			string switchStatus = $"開關狀態 => S1:{dict.GetValueOrDefault("MSP_SwitchStatus1", "-")}, S2:{dict.GetValueOrDefault("MSP_SwitchStatus2", "-")}, S3:{dict.GetValueOrDefault("MSP_SwitchStatus3", "-")}";
-
-			return $"{mainTemp} | {preheatTemp} | {tinBathTemp} | {switchStatus}";
-		}
-
-
-
-
-	}
-}
+//				return $"{mainTemp} | {preheatTemp} | {tinBathTemp} | {switchStatus}";
+//			}
+//			catch (Exception ex)
+//			{
+//				Console.WriteLine($"資料提取時發生錯誤: {ex.Message}");
+//				return "數據提取失敗";
+//			}
+//		}
+//	}
+//}

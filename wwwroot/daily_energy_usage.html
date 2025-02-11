@@ -44,21 +44,18 @@
     </style>
 </head>
 <body>
-    <!-- Sidebar -->
-    <!-- 引入sidebar.js -->
-    <div id="sidebar-container"></div>
-    <script src="js/sidebar.js"></script>
-
-
-    <!-- 累加總量顯示區域 -->
-    <div class="overview-container">
-        <h1>Electrical Energy</h1>
-        <p>Daily Total Consumption</p>
-        <div class="total-consumption" id="totalConsumption"></div>
-    </div>
-
-    <!-- 條形圖區域 -->
-    <div class="chart-container">
+ <!--Sidebar 
+ 引入sidebar.js--> 
+<div id="sidebar-container"></div>
+<script src="js/sidebar.js"></script>
+ <!--累加總量顯示區域--> 
+<div class="overview-container">
+    <h1>Electrical Energy</h1>
+    <p>Daily Total Consumption</p>
+    <div class="total-consumption" id="totalConsumption"></div>
+</div>
+ <!--條形圖區域--> 
+<div class="chart-container">
         <canvas id="myChart"></canvas>
     </div>
 
@@ -129,3 +126,508 @@
     </script>
 </body>
 </html>
+
+
+
+
+<!--250211:11:59_backup================================================================================
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consumption Overview</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .overview-container {
+            width: 80%;
+            margin: 20px 0;
+            text-align: center;
+            background-color: #f0f8ff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .total-consumption {
+            font-size: 24px;
+            font-weight: bold;
+            color: #0073e6;
+        }
+
+        .chart-container {
+            width: 80%;
+            margin-top: 20px;
+            height: 500px; /* 讓圖表有足夠的高度 */
+        }
+
+        canvas {
+            max-width: 100%;
+        }
+    </style>
+</head>
+<body>
+ 如果有sidebar就包含以下 
+<div id="sidebar-container"></div>
+<script src="js/sidebar.js"></script>
+ 累加總量顯示區域 
+<div class="overview-container">
+    <h1>Electrical Energy</h1>
+    <p>Daily Total Consumption</p>
+    <div class="total-consumption" id="totalConsumption"></div>
+</div>
+ 條形圖區域 
+<div class="chart-container">
+        <canvas id="myChart"></canvas>
+    </div>
+
+    <script>
+        async function main() {
+            // 向後端拉取資料
+            // 後端端點為: GET /api/Energy/daily-consumption
+            const res = await fetch('/api/Energy/daily-consumption');
+            const json = await res.json();
+
+            const labels = json.labels;
+            // e.g. ["8:00", "9:00", ...]
+            const troughData = json.data.Trough;
+            const preheatData = json.data.Preheat;
+            const powerData = json.data.Power;
+
+            // 計算累加總量 => Trough + Preheat + Power 所有小時加總
+            // 這裡假設要把所有小時 & 所有 source 加在一起
+            let total = 0;
+            for (let i = 0; i < labels.length; i++) {
+                total += troughData[i] + preheatData[i] + powerData[i];
+            }
+            document.getElementById('totalConsumption').innerText = `${total.toFixed(2)} kWh`;
+
+            // 創建多組 bar chart (Grouped Bar Chart)
+            const ctx = document.getElementById('myChart').getContext('2d');
+            const chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Trough (錫槽)',
+                            data: troughData,
+                            backgroundColor: 'rgba(255, 99, 132, 0.7)'
+                        },
+                        {
+                            label: 'Preheat (預熱)',
+                            data: preheatData,
+                            backgroundColor: 'rgba(54, 162, 235, 0.7)'
+                        },
+                        {
+                            label: 'Power (總電源)',
+                            data: powerData,
+                            backgroundColor: 'rgba(255, 205, 86, 0.7)'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Consumption (kWh)'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Hour'
+                            }
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Daily Energy Consumption (2025-02-07)'
+                        }
+                    }
+                }
+            });
+        }
+
+        main();
+    </script>
+</body>
+</html>-->
+
+
+
+
+<!--250211:11:59_backup================================================================================-->
+<!--<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consumption Overview</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .overview-container {
+            width: 80%;
+            margin: 20px 0;
+            text-align: center;
+            background-color: #f0f8ff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .total-consumption {
+            font-size: 24px;
+            font-weight: bold;
+            color: #0073e6;
+        }
+
+        .chart-container {
+            width: 80%;
+            margin-top: 20px;
+            height: 500px; /* 讓圖表有足夠的高度 */
+        }
+
+        canvas {
+            max-width: 100%;
+        }
+    </style>
+</head>
+<body>-->
+<!-- 如果有sidebar就包含以下 -->
+<!--<div id="sidebar-container"></div>
+    <script src="js/sidebar.js"></script>
+
+    <h1>Daily Energy Usage (2025-02-07)</h1>
+    <div style="width:80%; height:500px;">
+        <canvas id="myChart"></canvas>
+    </div>
+
+    <script>
+        async function main() {
+            // 後端 API => /api/Energy/daily-consumption?date=2025-02-07
+            const res = await fetch('/api/Energy/daily-consumption?date=2025-02-07');
+            const json = await res.json();
+
+            const labels = json.labels; // [ '8:00', '9:00', ... ]
+            const dataTrough = json.data.Trough;
+            const dataPreheat = json.data.Preheat;
+            const dataPower = json.data.Power;
+
+            // 畫 chart
+            const ctx = document.getElementById('myChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [
+                        {
+                            label: 'Trough',
+                            data: dataTrough,
+                            backgroundColor: 'rgba(255, 99, 132, 0.6)'
+                        },
+                        {
+                            label: 'Preheat',
+                            data: dataPreheat,
+                            backgroundColor: 'rgba(54, 162, 235, 0.6)'
+                        },
+                        {
+                            label: 'Power',
+                            data: dataPower,
+                            backgroundColor: 'rgba(255, 205, 86, 0.6)'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        }
+
+        main();
+    </script>
+</body>
+</html>-->
+<!--<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consumption Overview</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .overview-container {
+            width: 80%;
+            margin: 20px 0;
+            text-align: center;
+            background-color: #f0f8ff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .total-consumption {
+            font-size: 24px;
+            font-weight: bold;
+            color: #0073e6;
+        }
+
+        .chart-container {
+            width: 80%;
+            margin-top: 20px;
+            height: 500px; /* 讓圖表有足夠的高度 */
+        }
+
+        canvas {
+            max-width: 100%;
+        }
+    </style>
+</head>
+<body>-->
+<!-- 如果有sidebar就包含以下 -->
+<!--<div id="sidebar-container"></div>
+    <script src="js/sidebar.js"></script>
+
+    <h1>Daily Energy Usage (2025-02-07)</h1>
+    <div style="width:80%; height:500px;">
+        <canvas id="myChart"></canvas>
+    </div>
+
+    <script>
+        async function main() {
+            // 後端 API => /api/Energy/daily-consumption?date=2025-02-07
+            const res = await fetch('/api/Energy/daily-consumption?date=2025-02-07');
+            const json = await res.json();
+
+            const labels = json.labels; // [ '8:00', '9:00', ... ]
+            const dataTrough = json.data.Trough;
+            const dataPreheat = json.data.Preheat;
+            const dataPower = json.data.Power;
+
+            // 畫 chart
+            const ctx = document.getElementById('myChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [
+                        {
+                            label: 'Trough',
+                            data: dataTrough,
+                            backgroundColor: 'rgba(255, 99, 132, 0.6)'
+                        },
+                        {
+                            label: 'Preheat',
+                            data: dataPreheat,
+                            backgroundColor: 'rgba(54, 162, 235, 0.6)'
+                        },
+                        {
+                            label: 'Power',
+                            data: dataPower,
+                            backgroundColor: 'rgba(255, 205, 86, 0.6)'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Consumption (kWh)' // Y 軸標題
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Hour' // X 軸標題
+                            }
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Daily Energy Consumption (2025-02-07)' // 圖表標題
+                        }
+                    }
+                }
+            });
+        }
+
+        main();
+    </script>
+</body>
+</html>-->
+
+
+
+
+
+
+<!--250211最新還未完成====================================-->
+<!--<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consumption Overview</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .overview-container {
+            width: 80%;
+            margin: 20px 0;
+            text-align: center;
+            background-color: #f0f8ff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .total-consumption {
+            font-size: 24px;
+            font-weight: bold;
+            color: #0073e6;
+        }
+
+        .chart-container {
+            width: 80%;
+            margin-top: 20px;
+            height: 500px; /* 讓圖表有足夠的高度 */
+        }
+
+        canvas {
+            max-width: 100%;
+        }
+    </style>
+</head>
+<body>-->
+    <!-- 如果有sidebar就包含以下 -->
+    <!--<div id="sidebar-container"></div>
+    <script src="js/sidebar.js"></script>
+
+    <h1>Daily Energy Usage (2025-02-07)</h1>
+    <div style="width:80%; height:500px;">
+        <canvas id="myChart"></canvas>
+    </div>
+
+    <script>
+        async function main() {
+            // 後端 API => /api/Energy/daily-consumption?date=2025-02-07
+            const res = await fetch('/api/Energy/daily-consumption?date=2025-02-07');
+            const json = await res.json();
+
+            const labels = json.labels; // [ '8:00', '9:00', ... ]
+            const dataTrough = json.data.Trough;
+            const dataPreheat = json.data.Preheat;
+            const dataPower = json.data.Power;
+
+            // 畫 chart
+            const ctx = document.getElementById('myChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [
+                        {
+                            label: 'Trough',
+                            data: dataTrough,
+                            backgroundColor: 'rgba(255, 99, 132, 0.6)'
+                        },
+                        {
+                            label: 'Preheat',
+                            data: dataPreheat,
+                            backgroundColor: 'rgba(54, 162, 235, 0.6)'
+                        },
+                        {
+                            label: 'Power',
+                            data: dataPower,
+                            backgroundColor: 'rgba(255, 205, 86, 0.6)'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Consumption (kWh)' // Y 軸標題
+                            },
+                            ticks: {
+                                stepSize: 2, // 設置刻度間隔為 2
+                                callback: function (value) {
+                                    return value + ' kWh'; // 在刻度值後加上單位
+                                }
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Hour' // X 軸標題
+                            }
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Daily Energy Consumption (2025-02-07)' // 圖表標題
+                        }
+                    }
+                }
+            });
+        }
+
+        main();
+    </script>
+</body>
+</html>-->
