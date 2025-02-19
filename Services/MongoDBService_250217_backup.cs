@@ -81,6 +81,21 @@ namespace KafkaConsumerWebAPI.Services
 			}
 		}
 
+
+		//250217 新增：讀取指定集合中最新的消息（依 TimeStamp 排序取第一筆）==========================
+		public async Task<BsonDocument> GetLatestMessageAsync(string collectionName)
+		{
+			var collection = _database.GetCollection<BsonDocument>(collectionName);
+			var sort = Builders<BsonDocument>.Sort.Descending("Data.Data.RawData.TimeStamp");
+			return await collection.Find(FilterDefinition<BsonDocument>.Empty)
+									.Sort(sort)
+									.Limit(1)
+									.FirstOrDefaultAsync();
+		}
+		//250217 新增：讀取指定集合中最新的消息（依 TimeStamp 排序取第一筆）==========================
+
+
+
 		/// <summary>
 		/// 從 MongoDB 查詢指定時間範圍 (UTC時間) 的 EnergyConsumed 消息，
 		/// 並依照 Source & 小時取出 EnergyUsed。

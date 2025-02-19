@@ -66,6 +66,7 @@ namespace KafkaConsumerWebAPI.Services
 				SaslUsername = kafkaConfig["SaslUsername"],
 				SaslPassword = kafkaConfig["SaslPassword"],
 				AutoOffsetReset = AutoOffsetReset.Latest, // 只要最新的數據
+				//AutoOffsetReset = AutoOffsetReset.Earliest, // 只要最新的數據
 				EnableAutoCommit = false
 			};
 
@@ -73,7 +74,8 @@ namespace KafkaConsumerWebAPI.Services
 			var topics = new List<string>
 			{
 				"EAP.DG2.IPS.I01.DEVICE_CFX.CFX.ResourcePerformance.EnergyConsumed",
-				"EAP.DG2.IPS.I01.DEVICE_CFX.CFX.ResourcePerformance.StationParametersModified"
+				"EAP.DG2.IPS.I01.DEVICE_CFX.CFX.ResourcePerformance.StationParametersModified",
+				"EAP.DG2.IPS.I01.DEVICE_CFX.CFX.ResourcePerformance.FaultOccurred"
 			};
 
 			_consumer = new ConsumerBuilder<Ignore, byte[]>(consumerConfig)
@@ -193,7 +195,13 @@ namespace KafkaConsumerWebAPI.Services
 					if (name.StartsWith("OV_MainTemperature") ||
 						name.StartsWith("OV_PreheatTemperature") ||
 						name.StartsWith("OV_TinBathTemperature") ||
-						name.StartsWith("MSP_SwitchStatus"))
+						//name.StartsWith("MSP_SwitchStatus"))
+						//250217_新增===========================================================
+						name.StartsWith("OV_SwitchStatusMain") ||
+						name.StartsWith("OV_SwitchStatusPreHeat") ||
+						name.StartsWith("OV_SwitchStatusTinBath")
+						//250217_新增===========================================================
+						)
 					{
 						dict[name] = value;
 					}
@@ -215,6 +223,43 @@ namespace KafkaConsumerWebAPI.Services
 			}
 		}
 
+
+		//250217_新增===========================================
+		// 解析 FaultOccurred
+		private string ParseFaultOccurred(JsonElement root)
+		{
+			try
+			{
+				var dataEl = root.GetProperty("Data").GetProperty("Data");
+				var rawDataEl = dataEl.GetProperty("RawData");
+				var messageBody = rawDataEl.GetProperty("MessageBody");
+
+				// 取出 Fault 裡面的資訊
+				var faultEl = messageBody.GetProperty("Fault");
+				string faultCode = faultEl.GetProperty("FaultCode").GetString() ?? "";
+				string severity = faultEl.GetProperty("Severity").GetString() ?? "";
+				string description = faultEl.TryGetProperty("Description", out JsonElement descEl) ? descEl.GetString() : null;
+
+				// 如果 Source = "CFX.A00.SO20050832"，代表需要在前端顯示「異常」
+				var metaEl = dataEl.GetProperty("Meta");
+				string source = metaEl.GetProperty("Source").GetString() ?? "";
+
+				// 這裡可以依需求回傳字串，或直接回傳 null
+				// 只要讓前端知道 runStatus = "異常" 即可
+				// 這裡先回傳個描述
+				return $"FaultOccurred => FaultCode: {faultCode}, Severity: {severity}, Desc: {description}, Source: {source}";
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine($"ParseFaultOccurred Error: {ex.Message}");
+				return "數據提取失敗";
+			}
+
+
+		}
+		//250217_新增===========================================
+
+
 		// 主解析入口
 		private string ExtractRelevantData(string topic, string jsonString)
 		{
@@ -231,6 +276,13 @@ namespace KafkaConsumerWebAPI.Services
 				{
 					return ParseStationParams(root);
 				}
+
+				//250217_新增===========================================
+				else if (topic == "EAP.DG2.IPS.I01.DEVICE_CFX.CFX.ResourcePerformance.FaultOccurred")
+				{
+					return ParseFaultOccurred(root);
+				}
+				//250217_新增===========================================
 				else
 				{
 					return null;

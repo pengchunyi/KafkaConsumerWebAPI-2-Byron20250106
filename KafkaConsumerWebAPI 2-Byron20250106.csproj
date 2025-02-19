@@ -7,25 +7,39 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="cs_backup_repo\KafkaConsumerService_250115_backup.cs" />
-    <Compile Remove="Services\KafkaConsumerService_250120_backup.cs" />
-    <Compile Remove="Services\KafkaConsumerService_250120_bakcup2.cs" />
+    <Compile Remove="cs_backup_repo\**" />
+    <Compile Remove="wwwroot\backup_repo\**" />
+    <Content Remove="cs_backup_repo\**" />
+    <Content Remove="wwwroot\backup_repo\**" />
+    <EmbeddedResource Remove="cs_backup_repo\**" />
+    <EmbeddedResource Remove="wwwroot\backup_repo\**" />
+    <None Remove="cs_backup_repo\**" />
+    <None Remove="wwwroot\backup_repo\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Remove="wwwroot\backup_repo\clone_loginPage.html" />
-    <Content Remove="wwwroot\backup_repo\energy-overview_250115_backup.html" />
-    <Content Remove="wwwroot\backup_repo\index_backup.html" />
-    <Content Remove="wwwroot\backup_repo\kafka-dashboard_250115_backup.html" />
-    <Content Remove="wwwroot\backup_repo\RealTimeStoveDataDisplay_250115_backup.html" />
+    <Compile Remove="Controllers\EnergyController_250214_backup.cs" />
+    <Compile Remove="Controllers\EnergyController_250217_backup.cs" />
+    <Compile Remove="Controllers\EnergyController_250217_backup_fixedData.cs" />
+    <Compile Remove="Services\KafkaConsumerService.cs" />
+    <Compile Remove="Services\KafkaConsumerService_250120_backup.cs" />
+    <Compile Remove="Services\KafkaConsumerService_250120_bakcup2.cs" />
+    <Compile Remove="Services\KafkaConsumerService_250210_PASS.cs" />
+    <Compile Remove="Services\KafkaConsumerService_250211_backup.cs" />
+    <Compile Remove="Services\MongoDBService_250217_backup.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Remove="wwwroot\css\RealTimeStoveDataDisplay.css" />
     <Content Remove="wwwroot\css\styles_backup250109.css" />
+    <Content Remove="wwwroot\daily_energy_usage_250214_backup.html" />
     <Content Remove="wwwroot\I01_production_line_250122_backup.html" />
     <Content Remove="wwwroot\I01_production_line_250122_backup2.html" />
     <Content Remove="wwwroot\I01_production_line_250123_backup.html" />
     <Content Remove="wwwroot\I01_production_line_modular.html" />
     <Content Remove="wwwroot\index_250109backup.html" />
     <Content Remove="wwwroot\js\i01_production_line_250210_backup.js" />
+    <Content Remove="wwwroot\js\i01_production_line_250212_backup.js" />
     <Content Remove="wwwroot\js\index_250109.js" />
     <Content Remove="wwwroot\js\RealTimeStoveDataDisplay.css" />
     <Content Remove="wwwroot\js\RealTimeStoveDataDisplay.js" />
@@ -36,6 +50,7 @@
     <Content Remove="wwwroot\RealTimeStoveDataDisplay_250123_backup2.html" />
     <Content Remove="wwwroot\RealTimeStoveDataDisplay_250210_backup.html" />
     <Content Remove="wwwroot\RealTimeStoveDataDisplay_250210_backup2.html" />
+    <Content Remove="wwwroot\RealTimeStoveDataDisplay_250219_backup.html" />
   </ItemGroup>
 
   <ItemGroup>
@@ -44,11 +59,6 @@
     <PackageReference Include="MongoDB.Driver" Version="3.1.0" />
     <PackageReference Include="RabbitMQ.Client" Version="7.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="cs_backup_repo\" />
-    <Folder Include="wwwroot\backup_repo\" />
   </ItemGroup>
 
   <ItemGroup>

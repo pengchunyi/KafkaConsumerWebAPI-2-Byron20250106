@@ -72,6 +72,15 @@
 			color: #FF0000;
 		}
 
+		/* 運行狀態顏色 */
+		.equipment .status.normal {
+			color: #00FF00; /* 綠色：正常狀態 */
+		}
+
+		.equipment .status.abnormal {
+			color: #FF0000; /* 紅色：異常狀態 */
+		}
+
 	.equipment:hover {
 		box-shadow: 0 0 15px #FFFFFF;
 		cursor: pointer;

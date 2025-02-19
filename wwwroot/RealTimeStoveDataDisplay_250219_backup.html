@@ -77,10 +77,12 @@
 					<th>A 相</th>
 					<th>B 相</th>
 					<th>C 相</th>
+
 					<!-- 功率 A/B/C -->
 					<th>A 相</th>
 					<th>B 相</th>
 					<th>C 相</th>
+
 					<!-- 當前溫度 A/B/C -->
 					<th>A 相</th>
 					<th>B 相</th>
@@ -107,20 +109,52 @@
 		updateTime();
 
 		/*********************************************
-		 * [Modified] 統一轉換數值格式的函式：將 {"$numberDouble": "xxx"} 轉成純數字
+		 * (2) rowData：三行資料
 		 *********************************************/
-		function convertNumberDouble(value) {
-			if (typeof value === "object" && value !== null && value.hasOwnProperty("$numberDouble")) {
-				return parseFloat(value["$numberDouble"]);
-			}
-			if (value == null) return "-";
-			if (typeof value === "string" || typeof value === "number") return value;
-			return JSON.stringify(value);
-		}
+		//const rowData = {
+		//	// (1) 總電源
+		//	power: {
+		//		name: "總電源",
+		//		currentNowRYB: ["-", "-", "-"], // 三相電流
+		//		powerNowRYB: ["-", "-", "-"], // 三相功率
+		//		energyUsed: "-",              // 用電量 (kWh)
 
-		/*********************************************
-		 * (2) rowData：三行資料，新增 runStatus 屬性
-		 *********************************************/
+		//		// 溫度 (主開關)
+		//		mainTemp: ["-", "-", "-"],
+
+		//		// 開關狀態 => 只需 s1
+		//		switchStatus: { s1: "-" },
+		//	},
+		//	// (2) 預熱
+		//	preheat: {
+		//		name: "預熱",
+		//		currentNowRYB: ["-", "-", "-"],
+		//		powerNowRYB: ["-", "-", "-"],
+		//		energyUsed: "-",
+
+		//		// 溫度 (預熱)
+		//		preheatTemp: ["-", "-", "-"],
+
+		//		// 開關狀態 => s2
+		//		switchStatus: { s2: "-" },
+		//	},
+		//	// (3) 錫槽
+		//	trough: {
+		//		name: "錫槽",
+		//		currentNowRYB: ["-", "-", "-"],
+		//		powerNowRYB: ["-", "-", "-"],
+		//		energyUsed: "-",
+
+		//		// 溫度 (錫槽)
+		//		tinBathTemp: ["-", "-", "-"],
+
+		//		// 開關狀態 => s3
+		//		switchStatus: { s3: "-" },
+		//	},
+		//};
+		//250217_新增================================================
+		// 假設我們想在 rowData 中也記錄 runStatus
+		// 三行都預設 runStatus = "正常"
 		const rowData = {
 			power: {
 				name: "總電源",
@@ -129,7 +163,7 @@
 				energyUsed: "-",
 				mainTemp: ["-", "-", "-"],
 				switchStatus: { s1: "-" },
-				runStatus: "正常"  // [新增]
+				runStatus: "正常", // <--- 新增
 			},
 			preheat: {
 				name: "預熱",
@@ -138,7 +172,7 @@
 				energyUsed: "-",
 				preheatTemp: ["-", "-", "-"],
 				switchStatus: { s2: "-" },
-				runStatus: "正常"  // [新增]
+				runStatus: "正常", // <--- 新增
 			},
 			trough: {
 				name: "錫槽",
@@ -147,11 +181,14 @@
 				energyUsed: "-",
 				tinBathTemp: ["-", "-", "-"],
 				switchStatus: { s3: "-" },
-				runStatus: "正常"  // [新增]
+				runStatus: "正常", // <--- 新增
 			},
 		};
+		//250217_新增================================================
 
-		// 依據 Source 決定對應哪一行
+
+
+		// 只在 EnergyConsumed 時需要依照 Source 更新哪行
 		function mapSourceToKey(source) {
 			if (!source) return null;
 			if (source.endsWith(".Power")) return "power";
@@ -173,41 +210,49 @@
 			const parsed = JSON.parse(message);
 
 			if (topic === "EAP.DG2.IPS.I01.DEVICE_CFX.CFX.ResourcePerformance.EnergyConsumed") {
-				// 解析能耗數據，更新對應行的數值
+				// (A) 解析能耗 => 更新對應行的電流/功率/用電量
 				const source = parsed.Data.Data.Meta.Source;
 				const key = mapSourceToKey(source);
 				if (!key) return;
 
 				const mb = parsed.Data.Data.RawData.MessageBody;
+				//rowData[key].currentNowRYB = mb.CurrentNowRYB.map(x => x ?? "-");
+				//rowData[key].powerNowRYB = mb.PowerNowRYB.map(x => x ?? "-");
+				//rowData[key].energyUsed = mb.EnergyUsed ?? "-";
+
 				rowData[key].currentNowRYB = mb.CurrentNowRYB.map(x => convertNumberDouble(x)); // [Modified]
 				rowData[key].powerNowRYB = mb.PowerNowRYB.map(x => convertNumberDouble(x));       // [Modified]
 				rowData[key].energyUsed = convertNumberDouble(mb.EnergyUsed);                     // [Modified]
+
 			}
 			else if (topic === "EAP.DG2.IPS.I01.DEVICE_CFX.CFX.ResourcePerformance.StationParametersModified") {
-				// 解析溫度與開關狀態
+				// (B) 溫度與開關狀態 => 一筆可能同時包含三個部件 (power/preheat/trough)
 				const modifiedParams = parsed.Data.Data.RawData.MessageBody.ModifiedParameters;
+
 				modifiedParams.forEach(param => {
 					const name = param.Name;
 					const val = param.Value;
-					// 主開關溫度
+
+					// 主開關溫度 => 更新 rowData.power.mainTemp
 					if (name.startsWith("OV_MainTemperature")) {
-						const phase = name.slice(-1);
+						const phase = name.slice(-1); // 'A'/'B'/'C'
 						const idx = (phase === "A") ? 0 : (phase === "B") ? 1 : 2;
 						rowData.power.mainTemp[idx] = val;
 					}
-					// 預熱溫度
+					// 預熱溫度 => rowData.preheat.preheatTemp
 					else if (name.startsWith("OV_PreheatTemperature")) {
 						const phase = name.slice(-1);
 						const idx = (phase === "A") ? 0 : (phase === "B") ? 1 : 2;
 						rowData.preheat.preheatTemp[idx] = val;
 					}
-					// 錫槽溫度
+					// 錫槽溫度 => rowData.trough.tinBathTemp
 					else if (name.startsWith("OV_TinBathTemperature")) {
 						const phase = name.slice(-1);
 						const idx = (phase === "A") ? 0 : (phase === "B") ? 1 : 2;
 						rowData.trough.tinBathTemp[idx] = val;
 					}
-					// 開關狀態
+
+						// 開關狀態 => s1=power, s2=preheat, s3=trough
 					else if (name === "OV_SwitchStatusMain") {
 						rowData.power.switchStatus.s1 = val;
 					}
@@ -217,29 +262,43 @@
 					else if (name === "OV_SwitchStatusTinBath") {
 						rowData.trough.switchStatus.s3 = val;
 					}
+
+
 				});
 			}
-			// [新增] FaultOccurred 處理：如果 Source 為 "CFX.A00.SO20050832"，將 runStatus 設為 "異常"
+
+			//250217_新增=====================================================
 			else if (topic === "EAP.DG2.IPS.I01.DEVICE_CFX.CFX.ResourcePerformance.FaultOccurred") {
+				// 新增: 如果 Source = "CFX.A00.SO20050832"，把 runStatus 設為 "異常"
 				const source = parsed.Data.Data.Meta.Source;
 				if (source === "CFX.A00.SO20050832") {
+					// 假設要把 power/preheat/trough 都設為異常？或只設一個？
+					// 看你的需求。這裡示範全部
 					rowData.power.runStatus = "異常";
 					rowData.preheat.runStatus = "異常";
 					rowData.trough.runStatus = "異常";
 				}
 			}
 
-			// 儲存至 localStorage
+
+
+
+			// 儲存數據到 localStorage
 			localStorage.setItem("lastData", JSON.stringify(rowData));
+
+			// 最後重新渲染表格
 			updateTable();
+
 		});
 
-		/*********************************************
-		 * (3B) 初始化數據：從 localStorage 載入並補上 runStatus 預設值 [Modified]
-		 *********************************************/
+		// 初始化數據
 		const savedData = JSON.parse(localStorage.getItem("lastData"));
 		if (savedData) {
 			Object.keys(savedData).forEach(key => {
+				//if (rowData[key]) {
+				//	rowData[key] = savedData[key];
+				//}
+				// 如果 savedData 沒有 runStatus 屬性，則補上預設值 "正常"
 				if (!savedData[key].hasOwnProperty("runStatus") || savedData[key].runStatus === undefined) {
 					savedData[key].runStatus = "正常";
 				}
@@ -250,7 +309,7 @@
 		}
 
 		/*********************************************
-		 * (4) updateTable()：渲染 3 行到表格 [Modified]
+		 * (4) updateTable()：渲染 3 行到表格
 		 *********************************************/
 		function updateTable() {
 			const tableBody = document.getElementById("data-rows");
@@ -266,106 +325,174 @@
 				// 用電量
 				const engUsed = row.energyUsed;
 
-				// 根據行別取對應溫度
+				// 依照行別顯示對應溫度
 				let tA = "-", tB = "-", tC = "-";
 				if (key === "power") {
+					// power 顯示 mainTemp
 					[tA, tB, tC] = row.mainTemp;
 				}
 				else if (key === "preheat") {
+					// preheat 顯示 preheatTemp
 					if (!row.preheatTemp) row.preheatTemp = ["-", "-", "-"];
 					[tA, tB, tC] = row.preheatTemp;
 				}
 				else if (key === "trough") {
+					// trough 顯示 tinBathTemp
 					if (!row.tinBathTemp) row.tinBathTemp = ["-", "-", "-"];
 					[tA, tB, tC] = row.tinBathTemp;
 				}
 
-				// 開關狀態
+				// 開關狀態 => s1 / s2 / s3
 				let switchDisplay = "-";
 				if (key === "power") {
 					const s1 = row.switchStatus.s1;
-					switchDisplay = (s1 === "0") ? "分閘" : (s1 === "-") ? "-" : "合閘";
+					switchDisplay = (s1 === "0") ? "分閘"
+						: (s1 === "-") ? "-"
+							: "合閘";
 				}
 				else if (key === "preheat") {
 					const s2 = row.switchStatus.s2;
-					switchDisplay = (s2 === "0") ? "分閘" : (s2 === "-") ? "-" : "合閘";
+					switchDisplay = (s2 === "0") ? "分閘"
+						: (s2 === "-") ? "-"
+							: "合閘";
 				}
 				else if (key === "trough") {
 					const s3 = row.switchStatus.s3;
-					switchDisplay = (s3 === "0") ? "分閘" : (s3 === "-") ? "-" : "合閘";
+					switchDisplay = (s3 === "0") ? "分閘"
+						: (s3 === "-") ? "-"
+							: "合閘";
 				}
 
-				// 直接取 runStatus
-				const runStatus = row.runStatus;
+				// 運行狀態 => 示範寫死 "正常"
+				//250217新增_之後要修改成實時顯示狀態===================================================================
+				//const runStatus = "正常";
+				// 這裡把 runStatus 顯示出來
+				const runStatus = row.runStatus; 
+				//250217新增_之後要修改成實時顯示狀態===================================================================
 				const tempSetting = "100";
 
 				html += `
-			  <tr>
-				<td>${row.name}</td>
-				<!-- 電流 -->
-				<td>${cA}</td><td>${cB}</td><td>${cC}</td>
-				<!-- 功率 -->
-				<td>${pA}</td><td>${pB}</td><td>${pC}</td>
-				<!-- 當前溫度 -->
-				<td>${tA}</td><td>${tB}</td><td>${tC}</td>
-				<!-- 用電量 -->
-				<td>${engUsed}</td>
-				<!-- 開關狀態 -->
-				<td class="status normal">${switchDisplay}</td>
-				<!-- 運行狀態 -->
-				<td class="status normal">${runStatus}</td>
-				<!-- 溫度設定 -->
-				<td class="status normal">${tempSetting}</td>
-			  </tr>
-			`;
+									  <tr>
+										<td>${row.name}</td>
+
+										<!-- 電流(A相,B相,C相) -->
+										<td>${cA}</td><td>${cB}</td><td>${cC}</td>
+
+										<!-- 功率(W)(A,B,C) -->
+										<td>${pA}</td><td>${pB}</td><td>${pC}</td>
+
+										<!-- 當前溫度(A,B,C) -->
+										<td>${tA}</td><td>${tB}</td><td>${tC}</td>
+
+										<!-- 用電量 -->
+										<td>${engUsed}</td>
+
+										<!-- 開關狀態 -->
+										<td class="status normal">${switchDisplay}</td>
+
+										<!-- 運行狀態 -->
+										<td class="status normal">${runStatus}</td>
+
+										<!-- 溫度設定 -->
+										<td class="status normal">${tempSetting}</td>
+									  </tr>
+									`;
 			});
 
 			tableBody.innerHTML = html;
+
+			// 儲存數據到 localStorage
 			localStorage.setItem("lastData", JSON.stringify(rowData));
 		}
 
-		/*********************************************
-		 * (5) loadLatest3FromDB()：從 DB 取得最新 3 筆資料 [Modified]
-		 *********************************************/
-		async function loadLatest3FromDB() {
+		//250217新增=========================================================
+		// (5) 新增：若 Kafka 尚未送出數據時，頁面載入時從 DB 取得最新數據
+		// (1) 後端回傳的是「字串」形式的 JSON
+		// (2) 前端必須用 response.text() 拿到字串，再手動 JSON.parse()
+		async function loadLatestDataFromDB() {
 			try {
-				// 呼叫 API：一次取得三筆資料（依來源分別為 Power, Preheat, Trough）
-				const response = await fetch('/api/LatestMessage/latest3');
-				if (!response.ok) {
-					console.error("Failed to load 3 messages:", response.status);
-					return;
+				const topic = "EAP.DG2.IPS.I01.DEVICE_CFX.CFX.ResourcePerformance.EnergyConsumed";
+				const response = await fetch(`/api/LatestMessage/${encodeURIComponent(topic)}`);
+				if (response.ok) {
+					// 1) 先用 text() 拿到字串
+					const text = await response.text();
+					console.log("Raw string from DB:", text);
+
+					// 2) 再用 JSON.parse() 轉成 JS 物件
+					const data = JSON.parse(text);
+					console.log("Parsed object from DB:", data);
+
+					// 3) 檢查資料結構，並更新對應 rowData
+					//if (data && data.Data && data.Data.Data && data.Data.Data.Meta) {
+					//	const source = data.Data.Data.Meta.Source;
+					//	const key = mapSourceToKey(source);
+					//	if (key) {
+					//		const mb = data.Data.Data.RawData.MessageBody;
+					//		rowData[key].currentNowRYB = mb.CurrentNowRYB.map(x => x ?? "-");
+					//		rowData[key].powerNowRYB = mb.PowerNowRYB.map(x => x ?? "-");
+					//		rowData[key].energyUsed = mb.EnergyUsed ?? "-";
+					//		updateTable();
+					//	}
+					//}
+					if (data && data.Data && data.Data.Data && data.Data.Data.Meta) {
+						const source = data.Data.Data.Meta.Source;
+						const key = mapSourceToKey(source);
+						if (key) {
+							const mb = data.Data.Data.RawData.MessageBody;
+
+							// 1) 確認 CurrentNowRYB 是否為陣列，而且元素為數字/字串
+							if (Array.isArray(mb.CurrentNowRYB)) {
+								rowData[key].currentNowRYB = mb.CurrentNowRYB.map(x => {
+									// 如果 x 是物件，可能要做 x.value 或 JSON.stringify(x)
+									if (typeof x === "object" && x !== null) {
+										return x.value ?? JSON.stringify(x);
+									}
+									return x ?? "-";
+								});
+							}
+
+							// 2) 同理處理 powerNowRYB
+							if (Array.isArray(mb.PowerNowRYB)) {
+								rowData[key].powerNowRYB = mb.PowerNowRYB.map(x => {
+									if (typeof x === "object" && x !== null) {
+										return x.value ?? JSON.stringify(x);
+									}
+									return x ?? "-";
+								});
+							}
+
+							// 3) energyUsed
+							rowData[key].energyUsed = (typeof mb.EnergyUsed === "number" || typeof mb.EnergyUsed === "string")
+								? mb.EnergyUsed
+								: JSON.stringify(mb.EnergyUsed);
+
+							updateTable();
+						}
+					}
+
+
+
+
+				} else {
+					console.error("Failed to load latest data from DB:", response.status);
 				}
-
-				const list = await response.json();  // list 是陣列，內含 0～3 筆資料
-				console.log("Got 3 docs from DB:", list);
-
-				list.forEach(doc => {
-					const source = doc.Data.Data.Meta.Source; // e.g. "CFX.A00.SO20050832.Power"
-					const key = mapSourceToKey(source);
-					if (!key) return;
-					const mb = doc.Data.Data.RawData.MessageBody;
-					// 處理各數值欄位：使用 convertNumberDouble 統一格式
-					if (Array.isArray(mb.CurrentNowRYB)) {
-						rowData[key].currentNowRYB = mb.CurrentNowRYB.map(x => convertNumberDouble(x));
-					}
-					if (Array.isArray(mb.PowerNowRYB)) {
-						rowData[key].powerNowRYB = mb.PowerNowRYB.map(x => convertNumberDouble(x));
-					}
-					rowData[key].energyUsed = convertNumberDouble(mb.EnergyUsed);
-				});
-
-				updateTable();
 			} catch (err) {
-				console.error("Error loading 3 messages:", err);
+				console.error("Error loading latest data:", err);
 			}
 		}
 
-		// 頁面載入時執行 loadLatest3FromDB() [Modified]
-		window.addEventListener("load", function () {
-			loadLatest3FromDB();
-		});
 
-		// 啟動 SignalR 連線
+		// 頁面載入時執行 loadLatestDataFromDB
+		window.addEventListener("load", function () {
+			loadLatestDataFromDB();
+		});
+		//250217新增=========================================================
+		//還缺中間的建立 API Controller 取得最新消息
+
+
+
+
+		// 啟動連線
 		connection.start()
 			.then(() => console.log("SignalR connected"))
 			.catch(err => console.error("SignalR error:", err));
