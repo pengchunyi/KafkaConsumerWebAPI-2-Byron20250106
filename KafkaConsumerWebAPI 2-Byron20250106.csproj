@@ -21,6 +21,7 @@
     <Compile Remove="Controllers\EnergyController_250214_backup.cs" />
     <Compile Remove="Controllers\EnergyController_250217_backup.cs" />
     <Compile Remove="Controllers\EnergyController_250217_backup_fixedData.cs" />
+    <Compile Remove="Controllers\EnergyController_250220_backup_very_well.cs" />
     <Compile Remove="Services\KafkaConsumerService.cs" />
     <Compile Remove="Services\KafkaConsumerService_250120_backup.cs" />
     <Compile Remove="Services\KafkaConsumerService_250120_bakcup2.cs" />

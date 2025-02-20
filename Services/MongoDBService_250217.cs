@@ -136,6 +136,8 @@ namespace KafkaConsumerWebAPI.Services
 				// 解析成 C# DateTime
 				var dt = DateTime.Parse(timeStampStr);
 				// 如果希望存成 UTC，可加上 dt = dt.ToUniversalTime();
+				dt = dt.ToUniversalTime();
+				// 如果希望存成 UTC，可加上 dt = dt.ToUniversalTime();
 				// 將 TimeStamp 欄位換成 BSON DateTime 型別
 				doc["Data"]["Data"]["RawData"]["TimeStamp"] = new BsonDateTime(dt);
 			}
@@ -166,6 +168,9 @@ namespace KafkaConsumerWebAPI.Services
 		{
 			var collection = _database.GetCollection<BsonDocument>(collectionName);
 			var sort = Builders<BsonDocument>.Sort.Descending("Data.Data.RawData.TimeStamp");
+
+
+
 			return await collection.Find(FilterDefinition<BsonDocument>.Empty)
 								   .Sort(sort)
 								   .Limit(1)
@@ -182,11 +187,17 @@ namespace KafkaConsumerWebAPI.Services
 
 			// 按照 TimeStamp DESC，取最新一筆
 			var sort = Builders<BsonDocument>.Sort.Descending("Data.Data.RawData.TimeStamp");
+
+
+
+
 			return await collection.Find(filter)
 								   .Sort(sort)
 								   .Limit(1)
 								   .FirstOrDefaultAsync();
 		}
+
+
 
 		// [新增2]：一次取 Power/Preheat/Trough 三筆最新
 		public async Task<List<BsonDocument>> GetLatestEnergyConsumedAllSourcesAsync()
@@ -209,6 +220,8 @@ namespace KafkaConsumerWebAPI.Services
 					results.Add(doc);
 				}
 			}
+
+
 			return results;
 		}
 
@@ -224,6 +237,8 @@ namespace KafkaConsumerWebAPI.Services
 			var results = await collection.Find(filter)
 										  .Sort(Builders<BsonDocument>.Sort.Ascending("Data.Data.RawData.TimeStamp"))
 										  .ToListAsync();
+
+
 			return results;
 		}
 	}

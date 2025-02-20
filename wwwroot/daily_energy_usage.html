@@ -48,27 +48,23 @@
     </style>
 </head>
 <body>
-
-    <!-- Sidebar -->
-    <div id="sidebar-container"></div>
-    <script src="js/sidebar.js"></script>
-
-    <!-- 日期選擇框 -->
-    <div class="date-selector">
-        <label for="dateInput">選擇日期：</label>
-        <input type="date" id="dateInput">
-        <button id="searchButton">查詢</button>
-    </div>
-
-    <!-- 累加總量顯示區域 -->
-    <div class="overview-container">
-        <h1>Electrical Energy</h1>
-        <p>Daily Total Consumption</p>
-        <div class="total-consumption" id="totalConsumption"></div>
-    </div>
-
-    <!-- 條形圖區域 -->
-    <div class="chart-container">
+ <!--Sidebar--> 
+<div id="sidebar-container"></div>
+<script src="js/sidebar.js"></script>
+ <!--日期選擇框--> 
+<div class="date-selector">
+    <label for="dateInput">選擇日期：</label>
+    <input type="date" id="dateInput">
+    <button id="searchButton">查詢</button>
+</div>
+ <!--累加總量顯示區域--> 
+<div class="overview-container">
+    <h1>電能</h1>
+    <p>每日總耗能(只計算總開關)</p>
+    <div class="total-consumption" id="totalConsumption"></div>
+</div>
+ <!--條形圖區域--> 
+<div class="chart-container">
         <canvas id="myChart"></canvas>
     </div>
 
@@ -86,39 +82,46 @@
                 // 向後端 API 請求數據
                 const response = await fetch(`/api/Energy/daily-consumption?date=${dateInput}`);
                 if (!response.ok) {
-					// 如果後端回傳非 200，例如 400/500
+                    // 如果後端回傳非 200，例如 400/500
                     throw new Error(`API 回應錯誤: ${response.status} - ${response.statusText}`);
                 }
 
                 const json = await response.json();
 
-				// **判斷是否為空資料**
-				if (!json.labels || json.labels.length === 0) {
-					alert("當天無資料");
-					document.getElementById("totalConsumption").innerText = "0 kWh";
-					if (chart) chart.destroy();
-					return;
-				}
+                // **判斷是否為空資料**
+                if (!json.labels || json.labels.length === 0) {
+                    alert("當天無資料");
+                    document.getElementById("totalConsumption").innerText = "0 kWh";
+                    if (chart) chart.destroy();
+                    return;
+                }
 
-
-                //if (!json || !json.labels || !json.data) {
-                //    throw new Error("API 回應的數據格式不正確！");
-                //}
 
                 // 取得時間標籤與數據
                 const labels = json.labels;
-                const datasets = Object.keys(json.data).map((source, index) => ({
-                    label: source,
-                    data: json.data[source],
-                    backgroundColor: ["rgba(255, 99, 132, 0.7)",
-                                    "rgba(54, 162, 235, 0.7)",
-                                    "rgba(255, 205, 86, 0.7)"][index % 3]
-                }));
+                //const datasets = Object.keys(json.data).map((source, index) => ({
+                //    label: source,
+                //    data: json.data[source],
+                //    backgroundColor: ["rgba(255, 99, 132, 0.7)",
+                //                    "rgba(54, 162, 235, 0.7)",
+                //                    "rgba(255, 205, 86, 0.7)"][index % 3]
+                //}));
 
-                // 計算累計總量
+				const datasets = Object.keys(json.data).map((src, index) => ({
+					//let dataArr = labels.map(hour => json.data[source][hour] ?? 0); // 確保所有小時都有值
+					//return {
+					label: src,
+					data: json.data[src], // 這就是 24 筆數值
+                        backgroundColor: ["rgba(255, 99, 132, 0.7)","rgba(54, 162, 235, 0.7)","rgba(255, 205, 86, 0.7)"][index % 3]
+				}));
+
+
+                // 只加總 "CFX.A00.SO20050832.Power"
                 let total = 0;
-                Object.values(json.data).forEach(arr => {
-                    total += arr.reduce((acc, val) => acc + val, 0);
+                Object.entries(json.data).forEach(([sourceKey, arr]) => {
+                    if (sourceKey === "CFX.A00.SO20050832.Power") {
+                        total += arr.reduce((acc, val) => acc + val, 0);
+                    }
                 });
 
                 document.getElementById("totalConsumption").innerText = `${total.toFixed(2)} kWh`;
@@ -159,6 +162,15 @@
                             title: {
                                 display: true,
                                 text: "Hour"
+                            },
+
+                            ticks: {
+                                color: function (context) {
+                                    const hour = parseInt(labels[context.index]); // 解析小時
+                                    return (hour >= 0 && hour <= 7) || (hour >= 11 && hour <= 12) || (hour >= 17 && hour <= 23)
+                                        ? "red"  // 這些時間段顯示紅色(休息時間)
+                                        : "black"; // 其他時間保持黑色(生產時間)
+                                }
                             }
                         }
                     },
@@ -184,3 +196,153 @@
     </script>
 </body>
 </html>
+
+
+
+<!--<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Consumption Overview</title>
+    <link rel="stylesheet" href="css/styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        /* 省略CSS... */
+    </style>
+</head>
+<body>-->
+
+    <!-- Sidebar -->
+    <!--<div id="sidebar-container"></div>
+    <script src="js/sidebar.js"></script>-->
+
+    <!-- 日期選擇框 -->
+    <!--<div class="date-selector">
+        <label for="dateInput">選擇日期：</label>
+        <input type="date" id="dateInput" />
+        <button id="searchButton">查詢</button>
+    </div>-->
+
+    <!-- 累加總量顯示區域 -->
+    <!--<div class="overview-container">
+        <h1>電能</h1>
+        <p>每日總耗能(只計算總開關)</p>
+        <div class="total-consumption" id="totalConsumption"></div>
+    </div>-->
+
+    <!-- 條形圖 -->
+    <!--<div class="chart-container">
+        <canvas id="myChart"></canvas>
+    </div>
+
+    <script>
+        let chart;
+
+        async function fetchAndUpdateChart() {
+            const dateInput = document.getElementById("dateInput").value;
+            if (!dateInput) {
+                alert("請選擇日期！");
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/Energy/daily-consumption?date=${dateInput}`);
+                if (!response.ok) {
+                    throw new Error(`API 回應錯誤: ${response.status} - ${response.statusText}`);
+                }
+
+                const json = await response.json();
+
+                if (!json.labels || json.labels.length === 0) {
+                    alert("當天無資料");
+                    document.getElementById("totalConsumption").innerText = "0 kWh";
+                    if (chart) chart.destroy();
+                    return;
+                }
+
+                // 準備 Chart.js 所需資料
+                const labels = json.labels;
+                const datasets = Object.keys(json.data).map((source, index) => ({
+                    label: source,
+                    data: json.data[source],
+                    backgroundColor: [
+                        "rgba(255, 99, 132, 0.7)",
+                        "rgba(54, 162, 235, 0.7)",
+                        "rgba(255, 205, 86, 0.7)"
+                    ][index % 3]
+                }));
+
+                // 只加總 "CFX.A00.SO20050832.Power"
+                let total = 0;
+                Object.entries(json.data).forEach(([sourceKey, arr]) => {
+                    if (sourceKey === "CFX.A00.SO20050832.Power") {
+                        total += arr.reduce((acc, val) => acc + val, 0);
+                    }
+                });
+                document.getElementById("totalConsumption").innerText = `${total.toFixed(2)} kWh`;
+
+                updateChart(labels, datasets);
+            } catch (error) {
+                console.error("數據獲取失敗:", error);
+                alert("無法獲取數據，請檢查後端 API 是否正常！");
+            }
+        }
+
+        function updateChart(labels, datasets) {
+            const ctx = document.getElementById("myChart").getContext("2d");
+            if (chart) {
+                chart.destroy();
+            }
+            chart = new Chart(ctx, {
+                type: "bar",
+                data: { labels, datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: "Consumption (kWh)" }
+                        },
+                        x: {
+                            title: { display: true, text: "Hour" },
+                            ticks: {
+                                color: function (context) {
+                                    const hourStr = labels[context.index];
+                                    const hour = parseInt(hourStr);
+                                    // 紅色表示休息時段
+                                    return (hour >= 0 && hour <= 7) || (hour >= 11 && hour <= 12) || (hour >= 17 && hour <= 23)
+                                        ? "red"
+                                        : "black";
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: `Daily Energy Consumption for ${document.getElementById("dateInput").value}`
+                        }
+                    }
+                }
+            });
+        }
+
+        document.getElementById("searchButton").addEventListener("click", fetchAndUpdateChart);
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const today = new Date().toISOString().split("T")[0];
+            document.getElementById("dateInput").value = today;
+            fetchAndUpdateChart();
+        });
+    </script>
+</body>
+</html>-->

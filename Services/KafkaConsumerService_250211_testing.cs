@@ -195,7 +195,7 @@ namespace KafkaConsumerWebAPI.Services
 					if (name.StartsWith("OV_MainTemperature") ||
 						name.StartsWith("OV_PreheatTemperature") ||
 						name.StartsWith("OV_TinBathTemperature") ||
-						//name.StartsWith("MSP_SwitchStatus"))
+
 						//250217_新增===========================================================
 						name.StartsWith("OV_SwitchStatusMain") ||
 						name.StartsWith("OV_SwitchStatusPreHeat") ||
