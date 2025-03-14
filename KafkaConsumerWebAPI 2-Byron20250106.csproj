@@ -22,11 +22,15 @@
     <Compile Remove="Controllers\EnergyController_250217_backup.cs" />
     <Compile Remove="Controllers\EnergyController_250217_backup_fixedData.cs" />
     <Compile Remove="Controllers\EnergyController_250220_backup_very_well.cs" />
+    <Compile Remove="Controllers\EnergyController_250221_almost_ver.cs" />
+    <Compile Remove="Controllers\EnergyController_250226_backup.cs" />
+    <Compile Remove="Controllers\ProductionScheduleController_250226_backup.cs" />
     <Compile Remove="Services\KafkaConsumerService.cs" />
     <Compile Remove="Services\KafkaConsumerService_250120_backup.cs" />
     <Compile Remove="Services\KafkaConsumerService_250120_bakcup2.cs" />
     <Compile Remove="Services\KafkaConsumerService_250210_PASS.cs" />
     <Compile Remove="Services\KafkaConsumerService_250211_backup.cs" />
+    <Compile Remove="Services\MongoDBService_250217.cs" />
     <Compile Remove="Services\MongoDBService_250217_backup.cs" />
   </ItemGroup>
 
@@ -34,6 +38,8 @@
     <Content Remove="wwwroot\css\RealTimeStoveDataDisplay.css" />
     <Content Remove="wwwroot\css\styles_backup250109.css" />
     <Content Remove="wwwroot\daily_energy_usage_250214_backup.html" />
+    <Content Remove="wwwroot\daily_energy_usage_250221_backup.html" />
+    <Content Remove="wwwroot\daily_energy_usage_250226_backup.html" />
     <Content Remove="wwwroot\I01_production_line_250122_backup.html" />
     <Content Remove="wwwroot\I01_production_line_250122_backup2.html" />
     <Content Remove="wwwroot\I01_production_line_250123_backup.html" />
@@ -44,6 +50,8 @@
     <Content Remove="wwwroot\js\index_250109.js" />
     <Content Remove="wwwroot\js\RealTimeStoveDataDisplay.css" />
     <Content Remove="wwwroot\js\RealTimeStoveDataDisplay.js" />
+    <Content Remove="wwwroot\production_schedule_250224_backup.html" />
+    <Content Remove="wwwroot\production_schedule_250226_backup.html" />
     <Content Remove="wwwroot\RealTimeStoveDataDisplay_250120_backup.html" />
     <Content Remove="wwwroot\RealTimeStoveDataDisplay_250121_backup.html" />
     <Content Remove="wwwroot\RealTimeStoveDataDisplay_250121_backup2.html" />

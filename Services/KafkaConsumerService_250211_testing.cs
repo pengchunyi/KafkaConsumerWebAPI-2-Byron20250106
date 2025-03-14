@@ -59,23 +59,31 @@ namespace KafkaConsumerWebAPI.Services
 			var kafkaConfig = _configuration.GetSection("Kafka");
 			var consumerConfig = new ConsumerConfig
 			{
-				GroupId = kafkaConfig["GroupId"],
+				GroupId = kafkaConfig["GroupId"] ?? "default-consumer-group",
 				BootstrapServers = kafkaConfig["BootstrapServers"],
-				SecurityProtocol = SecurityProtocol.SaslPlaintext,
-				SaslMechanism = SaslMechanism.Plain,
-				SaslUsername = kafkaConfig["SaslUsername"],
-				SaslPassword = kafkaConfig["SaslPassword"],
-				AutoOffsetReset = AutoOffsetReset.Latest, // 只要最新的數據
-				//AutoOffsetReset = AutoOffsetReset.Earliest, // 只要最新的數據
+
+				//250314測試3廠kafka========================================
+				//SecurityProtocol = SecurityProtocol.SaslPlaintext,
+				//SaslMechanism = SaslMechanism.Plain,
+				//SaslUsername = kafkaConfig["SaslUsername"],
+				//SaslPassword = kafkaConfig["SaslPassword"],
+				//250314測試3廠kafka========================================
+				AutoOffsetReset = AutoOffsetReset.Latest, // 最新的數據
+				//AutoOffsetReset = AutoOffsetReset.Earliest, // 最舊的數據
 				EnableAutoCommit = false
+				//EnableAutoCommit = true
 			};
 
 			// 2. 訂閱 Topic
 			var topics = new List<string>
 			{
-				"EAP.DG2.IPS.I01.DEVICE_CFX.CFX.ResourcePerformance.EnergyConsumed",
-				"EAP.DG2.IPS.I01.DEVICE_CFX.CFX.ResourcePerformance.StationParametersModified",
-				"EAP.DG2.IPS.I01.DEVICE_CFX.CFX.ResourcePerformance.FaultOccurred"
+				//"EAP.DG2.IPS.I01.DEVICE_CFX.CFX.ResourcePerformance.EnergyConsumed",
+				//"EAP.DG2.IPS.I01.DEVICE_CFX.CFX.ResourcePerformance.StationParametersModified",
+				//"EAP.DG2.IPS.I01.DEVICE_CFX.CFX.ResourcePerformance.FaultOccurred"
+
+				////250314測試3廠kafka========================================
+				"EAP.DG3.SV.S01.DEVICE_CFX.CFX.ResourcePerformance.EnergyConsumed"
+				////250314測試3廠kafka========================================
 			};
 
 			_consumer = new ConsumerBuilder<Ignore, byte[]>(consumerConfig)

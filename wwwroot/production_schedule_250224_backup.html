@@ -1,0 +1,117 @@
+﻿<!--<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生產排程表</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+
+        .container {
+            width: 90%;
+            margin: 20px auto;
+            text-align: center;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            background-color: #005387;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 1rem;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            text-align: center;
+            padding: 8px;
+        }
+
+        th {
+            background-color: #005387;
+            color: white;
+        }
+
+        td {
+            background-color: #ffffff;
+        }
+    </style>
+</head>
+<body>-->
+    <!-- Sidebar -->
+    <!--<div id="sidebar-container"></div>
+    <script src="js/sidebar.js"></script>
+
+
+    <div class="container">
+        <h1>生產排程表</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th rowspan="2">星期</th>
+                    <th colspan="2">錫槽</th>
+                    <th colspan="4">預熱段</th>
+                </tr>
+                <tr>
+                    <th>時間段一 (開機時間)</th>
+                    <th>時間段一 (關機時間)</th>
+                    <th>時間段二 (開機時間)</th>
+                    <th>時間段二 (關機時間)</th>
+                    <th>時間段三 (開機時間)</th>
+                    <th>時間段三 (關機時間)</th>
+                </tr>
+            </thead>
+            <tbody id="schedule-body">-->
+                <!-- JavaScript 動態插入 -->
+            <!--</tbody>
+        </table>
+    </div>
+
+    <script>
+        // 表格數據
+        const scheduleData = [
+            { day: "星期一", tinStart: "05:20", tinEnd: "17:10", preheatStart1: "07:40", preheatEnd1: "11:40", preheatStart2: "12:30", preheatEnd2: "17:10" },
+            { day: "星期二", tinStart: "05:20", tinEnd: "17:10", preheatStart1: "07:40", preheatEnd1: "11:40", preheatStart2: "12:30", preheatEnd2: "17:10" },
+            { day: "星期三", tinStart: "05:20", tinEnd: "17:10", preheatStart1: "07:40", preheatEnd1: "11:40", preheatStart2: "12:30", preheatEnd2: "17:10" },
+            { day: "星期四", tinStart: "05:20", tinEnd: "17:10", preheatStart1: "07:40", preheatEnd1: "11:40", preheatStart2: "12:30", preheatEnd2: "17:10" },
+            { day: "星期五", tinStart: "05:20", tinEnd: "17:10", preheatStart1: "07:40", preheatEnd1: "11:40", preheatStart2: "12:30", preheatEnd2: "17:10" },
+            { day: "星期六", tinStart: "05:20", tinEnd: "17:10", preheatStart1: "07:40", preheatEnd1: "11:40", preheatStart2: "12:30", preheatEnd2: "17:10" }
+        ];
+
+        // 動態生成表格
+        const scheduleBody = document.getElementById("schedule-body");
+        scheduleData.forEach(row => {
+            const tr = document.createElement("tr");
+
+            // 依次插入每col數據
+            tr.innerHTML = `
+                        <td>${row.day}</td>
+                        <td>${row.tinStart}</td>
+                        <td>${row.tinEnd}</td>
+                        <td>${row.preheatStart1}</td>
+                        <td>${row.preheatEnd1}</td>
+                        <td>${row.preheatStart2}</td>
+                        <td>${row.preheatEnd2}</td>
+                    `;
+
+            scheduleBody.appendChild(tr);
+        });
+    </script>
+</body>
+</html>-->

@@ -1,4 +1,138 @@
-﻿<!DOCTYPE html>
+﻿<!--<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生產排程表</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+
+        .rest-row {
+            color: #FF0000; /* 一般紅字體 */
+        }
+
+
+        .container {
+            width: 90%;
+            margin: 20px auto;
+            text-align: center;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            background-color: #005387;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 1rem;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            text-align: center;
+            padding: 8px;
+        }
+
+        th {
+            background-color: #005387;
+            color: white;
+        }
+
+        td {
+            background-color: #ffffff;
+        }
+    </style>
+</head>
+<body>-->
+    <!--Sidebar-->
+    <!--<div id="sidebar-container"></div>
+    <script src="js/sidebar.js"></script>
+
+
+    <div class="container">
+        <h1>生產排程表</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>開始時間</th>
+                    <th>結束時間</th>
+                    <th>持續時間 (分鐘)</th>
+                    <th>生產 / 休息</th>
+                </tr>
+            </thead>
+            <tbody id="schedule-body">-->
+                <!--這裡將由 JavaScript 動態填充-->
+            <!--</tbody>
+        </table>
+    </div>
+
+    <script>
+        async function fetchScheduleData() {
+            try {
+                const response = await fetch("http://localhost:5000/api/schedule");
+
+                if (!response.ok) {
+                    throw new Error("獲取數據失敗");
+                }
+
+                let scheduleData = await response.json();
+
+                console.log("API 返回數據:", scheduleData); // Debugging: 確保數據有抓到
+
+                // ✅ 依照 `startTime` 進行升序排序
+                scheduleData.sort((a, b) => parseInt(a.startTime) - parseInt(b.startTime));
+
+                const scheduleBody = document.getElementById("schedule-body");
+
+                // 清空表格，避免重複加載
+                scheduleBody.innerHTML = "";
+
+                scheduleData.forEach(entry => {
+                    const row = document.createElement("tr");
+
+                    // ✅ 如果是休息，添加 `class="rest-row"`
+                    row.className = entry.type === "R" ? "rest-row" : "";
+
+                    row.innerHTML = `
+                        <td>${entry.startTime}</td>
+                        <td>${entry.endTime}</td>
+                        <td>${entry.duration}</td>
+                        <td>${entry.type === "P" ? "生產" : "休息"}</td>
+                    `;
+
+                    scheduleBody.appendChild(row);
+                });
+
+            } catch (error) {
+                console.error("加載排程數據時出錯:", error);
+            }
+        }
+
+        // 頁面加載時自動獲取數據
+        window.onload = fetchScheduleData;
+    </script>
+
+</body>
+</html>-->
+
+
+
+<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
@@ -68,17 +202,11 @@
     </style>
 </head>
 <body>
-    <!--Sidebar-->
+     <!--Sidebar-->
     <div id="sidebar-container"></div>
     <script src="js/sidebar.js"></script>
 
-    <!--250226新增=======================================-->
-    <!-- 加載共享 JS -->
-    <script src="js/shared.js"></script>
-    <!--250226新增=======================================-->
-
-
-    <!--日期選擇區塊-->
+     <!--日期選擇區塊-->
     <div class="date-selector-container">
         <div class="date-selector">
             <label for="dateInput">選擇日期：</label>
@@ -100,17 +228,12 @@
                 </tr>
             </thead>
             <tbody id="schedule-body">
-                <!--這裡將由 JavaScript 動態填充-->
-            </tbody>
+<!--這裡將由 JavaScript 動態填充-->
+</tbody>
         </table>
     </div>
 
     <script>
-        //250226_新增=====================================================
-        let restHours = new Set(); // 存儲休息時間的小時
-        //250226_新增=====================================================
-
-
         async function fetchScheduleData(date) {
             try {
                 // 將日期作為查詢參數傳給 API (例如 ?date=20241228)
@@ -130,42 +253,19 @@
                 const scheduleBody = document.getElementById("schedule-body");
                 scheduleBody.innerHTML = ""; // 清空表格
 
-                //250226_新增====================================================================
-                // 如果 API 返回空數據，顯示無數據訊息
-                if (!scheduleData || scheduleData.length === 0) {
-                    scheduleBody.innerHTML = `<tr><td colspan="4">無數據</td></tr>`;
-                    return;
-                }
-                //250226_新增====================================================================
-
                 scheduleData.forEach(entry => {
                     const row = document.createElement("tr");
                     // 如果為休息則加上 CSS 類別，使該行顯示為鮮紅色
                     row.className = entry.type === "R" ? "rest-row" : "";
                     //row.className = entry.type.includes("休息") ? "rest-row" : "";
                     row.innerHTML = `
-                            <td>${entry.startTime}</td>
-                            <td>${entry.endTime}</td>
-                            <td>${entry.duration}</td>
-                            <td>${entry.type === "P" ? "生產" : "休息"}</td>
-                          `;
+                    <td>${entry.startTime}</td>
+                    <td>${entry.endTime}</td>
+                    <td>${entry.duration}</td>
+                    <td>${entry.type === "P" ? "生產" : "休息"}</td>
+                  `;
                     scheduleBody.appendChild(row);
-
-                    //250226_新增====================================================================
-                    // 記錄休息時間的小時
-                    if (entry.type === "R") {
-                        const restHour = parseInt(entry.startTime.split(":")[0]); // 取得小時部分
-                        restHours.add(restHour);
-                    }
-                    //250226_新增====================================================================
-
                 });
-                
-                //250226_新增====================================================================
-                // 調用 updateChart 更新圖表
-                fetchAndUpdateChart();
-                //250226_新增====================================================================
-
             } catch (error) {
                 console.error("加載排程數據時出錯:", error);
             }

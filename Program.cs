@@ -92,13 +92,30 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.WebHost.UseUrls("http://localhost:5000");
 
+
+
+
+//250224_update====================================================================
+// 註冊 HttpClient（解決 `HttpClient` 無法解析的錯誤）
+builder.Services.AddHttpClient();
+
 // ✅ 註冊服務
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer(); // 確保 API 端點可用
 builder.Services.AddSwaggerGen(); // Swagger 文檔 (可測試 API)
 
 // ✅ 註冊 MongoDB
-builder.Services.AddSingleton<MongoDBService>();
+//builder.Services.AddSingleton<MongoDBService>();
+// ✅ 註冊 MongoDB 並初始化
+builder.Services.AddSingleton<MongoDBService>(provider =>
+{
+	string mongoConnectionString = "mongodb://localhost:27017"; // 你的 MongoDB 連線字串
+	string databaseName = "KafkaMessagesDB"; // 替換為你的 MongoDB 資料庫名稱
+	return new MongoDBService(mongoConnectionString, databaseName);
+});
+
+
+
 
 // ✅ 註冊 Kafka 消費者
 builder.Services.AddSingleton<ConcurrentQueue<string>>(); // 緩存 Kafka 消息
